@@ -1,0 +1,947 @@
+/*
+ * Copyright 2010, 2011 Institut Pasteur.
+ * 
+ * This file is part of ICY.
+ * 
+ * ICY is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * ICY is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with ICY. If not, see <http://www.gnu.org/licenses/>.
+ */
+package plugins.fab.trackmanager;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.event.ChangeEvent;
+
+import icy.gui.dialog.MessageDialog;
+import icy.gui.frame.progress.AnnounceFrame;
+import icy.main.Icy;
+import icy.sequence.Sequence;
+import icy.swimmingPool.SwimmingObject;
+import plugins.nchenouard.spot.Detection;
+
+/**
+ * TrackPool object used for TrackEditor. A trackPool is as a pool of TrackSegment.
+ * 
+ * @author Fabrice de Chaumont
+ */
+
+public class TrackPool
+{
+
+    private TrackManagerPainter tePainter;
+
+    private ArrayList<PluginTrackManagerProcessor> trackManagerProcessorList = new ArrayList<PluginTrackManagerProcessor>();
+
+    private ArrayList<TrackManagerProcessorListener> trackEditorProcessorListener = new ArrayList<TrackManagerProcessorListener>();
+
+    public TrackPool()
+    {
+        tePainter = new TrackManagerPainter(this);
+    }
+
+    public ArrayList<PluginTrackManagerProcessor> getTrackManagerProcessorList()
+    {
+        return trackManagerProcessorList;
+    }
+
+    public void addTrackProcessor(PluginTrackManagerProcessor tep)
+    {
+        trackManagerProcessorList.add(tep);
+        fireTrackEditorProcessorChange();
+    }
+
+    /** Add a listener that will send changes on TrackEditorProcessor's ArrayList */
+    public void addTrackProcessorListener(TrackManagerProcessorListener tepl)
+    {
+        trackEditorProcessorListener.add(tepl);
+    }
+
+    public void computeTrackProcessor()
+    {
+        for (PluginTrackManagerProcessor tep : trackManagerProcessorList)
+        {
+            long startTimeInNs = System.nanoTime();
+            tep.Compute();
+            tep.setPerformance((int) ((System.nanoTime() - startTimeInNs) / 1000000f));
+        }
+    }
+
+    public void clearTracks()
+    {
+        for (TrackGroup trackGroup : getTrackGroupList())
+            trackGroup.getTrackSegmentList().clear();
+
+        fireTrackEditorProcessorChange();
+    }
+
+    public boolean isLinkExists(TrackSegment start, TrackSegment end)
+    {
+        for (Link link : getLinks()) // check if the link already exists.
+        {
+            if (link.start == start && link.end == end)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void createLink(TrackSegment start, TrackSegment end)
+    {
+        boolean alreadyExist = false;
+        alreadyExist = isLinkExists(start, end);
+
+        if (!alreadyExist)
+        {
+            // System.out.println("create a new link.");
+            start.nextList.add(end);
+            end.previousList.add(start);
+        }
+    }
+
+    /** Creates a virtual track */
+    public void createVirtualTrackWith2Detection(Detection detectionStart, Detection detectionEnd)
+    {
+
+        TrackSegment segmentStart = getTrackSegmentWithDetection(detectionStart);
+        TrackSegment segmentEnd = getTrackSegmentWithDetection(detectionEnd);
+
+        if (segmentStart == segmentEnd)
+        {
+            MessageDialog.showDialog("Can't link 2 detections belonging to the same track.",
+                    MessageDialog.INFORMATION_MESSAGE);
+            return;
+        }
+
+        if (segmentStart.getOwnerTrackGroup() != segmentStart.getOwnerTrackGroup())
+        {
+            MessageDialog.showDialog("The two tracks should be from the same track group.",
+                    MessageDialog.INFORMATION_MESSAGE);
+            return;
+        }
+
+        if (detectionStart.getT() >= detectionEnd.getT())
+        {
+            MessageDialog.showDialog("Can't create a backward link.", MessageDialog.INFORMATION_MESSAGE);
+            return;
+        }
+
+        // check if detection are at start and end of their tracksegment.
+        {
+            if (detectionStart != segmentStart.getLastDetection())
+            {
+                // The detection is not the last of the track.
+                // Must split the start track.
+
+                ArrayList<TrackSegment> returnList = splitTrackSegment(segmentStart,
+                        segmentStart.getDetectionIndex(detectionStart), true);
+                // should render 2 segments. The first is the one we want. We take the last detection of the first tracksegment.
+                detectionStart = returnList.get(0).getLastDetection();
+                segmentStart = getTrackSegmentWithDetection(detectionStart);
+            }
+
+            if (detectionEnd != segmentEnd.getFirstDetection())
+            {
+                // The detection is not the first of the track.
+                // Must split the end track.
+
+                ArrayList<TrackSegment> returnList = splitTrackSegment(segmentEnd,
+                        segmentEnd.getDetectionIndex(detectionEnd) - 1, true);
+                // should render 2 segments. The second is the one we want. We take the first detection of the second tracksegment.
+                detectionEnd = returnList.get(1).getFirstDetection();
+                segmentEnd = getTrackSegmentWithDetection(detectionEnd);
+            }
+        }
+
+        // System.out.println("debug: creates final link.");
+
+        // Creates final link.
+        // check if start detection is t-1 end detection.
+        // if not, creates a bridge with a tracksegment of virtual detections.
+
+        if (detectionEnd.getT() - detectionStart.getT() != 1)
+        {
+            TrackSegment vts = new TrackSegment();
+
+            for (int t = detectionStart.getT() + 1; t < detectionEnd.getT(); t++)
+            {
+                // linear interpolation.
+
+                double xstart = detectionStart.getX();
+                double ystart = detectionStart.getY();
+                double zstart = detectionStart.getZ();
+
+                double xend = detectionEnd.getX();
+                double yend = detectionEnd.getY();
+                double zend = detectionEnd.getZ();
+
+                double nbt = detectionEnd.getT() - detectionStart.getT();
+
+                double vx = (xend - xstart) / nbt;
+                double vy = (yend - ystart) / nbt;
+                double vz = (zend - zstart) / nbt;
+
+                double x = xstart + vx * (t - detectionStart.getT());
+                double y = ystart + vy * (t - detectionStart.getT());
+                double z = zstart + vz * (t - detectionStart.getT());
+
+                Detection detect = new Detection(x, y, z, t);
+                // Detection detect = detectionStart.getDetectionEditor().createDetection( x , y , z , t );
+                // if ( detect == null )
+                // {
+                // System.err.println("TrackPool: Can not create the track. DetectionEditorExternalTools return null on createDetection().");
+                // return;
+                // }
+                // detect.setDeet( detectionStart.getDetectionEditor() );
+                detect.setDetectionType(Detection.DETECTIONTYPE_VIRTUAL_DETECTION);
+                vts.addDetection(detect);
+            }
+
+            TrackGroup trackGroup = segmentStart.getOwnerTrackGroup();
+            // System.out.println("debug trackgroup = " + trackGroup );
+            int indexSegmentStart = trackGroup.getTrackSegmentList().indexOf(segmentStart);
+
+            // vts.setTrackGroup( segmentStart.getTrackGroup() );
+            // segmentEnd.setTrackGroup( segmentStart.getTrackGroup() );
+
+            trackGroup.getTrackSegmentList().add(indexSegmentStart, vts);
+            vts.setOwnerTrackGroup(trackGroup);
+
+            createLink(segmentStart, vts);
+            createLink(vts, segmentEnd);
+            new AnnounceFrame("Link(s) created", 2);
+        }
+        else
+        {
+            // segmentEnd.setTrackGroup( segmentStart.getTrackGroup() );
+            if (isLinkExists(segmentStart, segmentEnd))
+            {
+                removeLink(segmentStart, segmentEnd);
+
+                new AnnounceFrame("Link deleted", 2);
+            }
+            else
+            {
+                createLink(segmentStart, segmentEnd);
+                new AnnounceFrame("Link created", 2);
+            }
+        }
+        // display link list
+        // System.out.println("-----------");
+
+        // ****** check and remove identical links
+        // int nbIdenticalLink = 0;
+        ArrayList<Link> linkList = getLinks();
+        for (Link l1 : linkList)
+        {
+            for (Link l2 : linkList)
+            {
+                if (l1.getStartDetection() == l2.getStartDetection())
+                    if (l1.getEndDetection() == l2.getEndDetection())
+                        if (l1 != l2)
+                        {
+                            // nbIdenticalLink++;
+                            removeLink(l1.getStartSegment(), l2.getEndSegment());
+                            // System.err.println( "REMOVING DUPLICATED LINK");
+                        }
+            }
+        }
+        // System.out.println("Number of identical links: " + nbIdenticalLink );
+
+        // for ( Link l : linkList )
+        // {
+        // System.out.println( "i:" + linkList.indexOf(l ) + " s:" + l.getStartDetection() + " e:" + l.getEndDetection() );
+        // }
+    }
+
+    /** Creates a virtual track */
+    public void createVirtualTrackWith2TrackDetection(Detection detectionStart, Detection detectionEnd)
+    {
+
+        // check if both sides of the link are TrackDetectionComponents.
+        if (detectionStart == null)
+            return;
+        if (detectionEnd == null)
+            return;
+
+        // check if they are not equal.
+        if (detectionStart == detectionEnd)
+            return;
+
+        createVirtualTrackWith2Detection(detectionStart, detectionEnd);
+    }
+
+    /** cuts track after detection */
+    public void cutTrackAfterDetection(Detection d)
+    {
+        TrackSegment ts = getTrackSegmentWithDetection(d);
+        splitTrackSegment(ts, ts.getDetectionList().indexOf(d), false);
+        new AnnounceFrame("Track split", 2);
+    }
+
+    public void deleteSelectedLink()
+    {
+        // System.out.println("debug delete selected link");
+
+        ArrayList<Link> links = getLinks();
+
+        ArrayList<Link> linksClone = new ArrayList<Link>(links);
+
+        for (Link link : linksClone)
+        {
+            // System.out.println( "link: " + link );
+
+            // TrackSegment tsEndtest = getTrackSegmentWithDetection(link.getEndDetection());
+            // TrackSegment tsStarttest = getTrackSegmentWithDetection(link.getStartDetection());
+            // System.out.println( "end ts all selected: " + tsEndtest.isAllDetectionSelected() );
+            // System.out.println( "start ts all selected: " + tsStarttest.isAllDetectionSelected() );
+
+            if (link.getStartDetection().isSelected() && link.getEndDetection().isSelected())
+            {
+                // System.out.println("Link selected " + link );
+                // System.out.println( "debug found link with selection");
+                links.remove(link);
+                TrackSegment tsEnd = getTrackSegmentWithDetection(link.getEndDetection());
+                TrackSegment tsStart = getTrackSegmentWithDetection(link.getStartDetection());
+                tsEnd.removePrevious(tsStart);
+                tsStart.removeNext(tsEnd);
+
+                // System.out.println("Post result:");
+
+                // System.out.println("debug tsEnd: " + tsEnd.previousList.size() );
+                // System.out.println("debug tsStart: " + tsEnd.previousList.size() );
+
+            }
+            // else
+            // {
+            // System.out.println("Link not selected");
+            // }
+        }
+        fireTrackEditorProcessorChange();
+    }
+
+    public void deleteSelectedTracks()
+    {
+        beginUpdate();
+        ArrayList<TrackSegment> tsListClone = new ArrayList<TrackSegment>(getTrackSegmentList());
+        for (TrackSegment ts : tsListClone)
+        {
+            if (ts.isAllDetectionSelected())
+            {
+                deleteTrack(ts);
+            }
+        }
+        endUpdate();
+        fireTrackEditorProcessorChange();
+    }
+
+    /**
+     * @param ts
+     * @return null if no trackgroup contains the tracksegment
+     */
+    public TrackGroup getTrackGroupContainingSegment(TrackSegment ts)
+    {
+        return ts.getOwnerTrackGroup();
+
+    }
+
+    public void deleteTrack(TrackSegment ts)
+    {
+
+        // System.out.println("----");
+        // System.out.println("Track segment id: " + ts.toString() );
+
+        TrackGroup trackGroup = getTrackGroupContainingSegment(ts);
+        if (trackGroup == null)
+        {
+            System.out.println(
+                    "Can't delete The track segment " + ts.toString() + " Reason: it is not in any trackGroup");
+            return;
+        }
+        trackGroup.getTrackSegmentList().remove(ts);
+        ArrayList<Link> links = getLinks();
+        ArrayList<Link> linksClone = new ArrayList<Link>(links);
+
+        for (Link link : linksClone)
+        {
+            if (ts.containsDetection(link.getStartDetection()))
+            {
+                links.remove(link);
+                TrackSegment tsEnd = getTrackSegmentWithDetection(link.getEndDetection());
+                tsEnd.removePrevious(ts);
+            }
+
+            if (ts.containsDetection(link.getEndDetection()))
+            {
+                links.remove(link);
+                TrackSegment tsStart = getTrackSegmentWithDetection(link.getStartDetection());
+                tsStart.removeNext(ts);
+            }
+        }
+
+        ts.removeId();
+
+        fireTrackEditorProcessorChange();
+
+    }
+
+    @Override
+    protected void finalize() throws Throwable
+    {
+
+        tePainter = null;
+        super.finalize();
+    }
+
+    boolean isUpdating = false;
+
+    public void beginUpdate()
+    {
+        isUpdating = true;
+    }
+
+    public void endUpdate()
+    {
+        isUpdating = false;
+    }
+
+    public void fireTrackEditorProcessorChange()
+    {
+        if (!isUpdating)
+        {
+            for (TrackManagerProcessorListener tepl : trackEditorProcessorListener)
+                tepl.TrackEditorProcessorChange(new ChangeEvent(this));
+        }
+    }
+
+    /** If only one link is linking 2 tracks, it means they could be the same track */
+    public void fuseAllTracks()
+    {
+        // System.out.println("Start Fusion.");
+
+        boolean fuseOperationPerformed = true; // flag to restart fuse operation from zero each time a fuse has been performed.
+
+        while (fuseOperationPerformed)
+        {
+            fuseOperationPerformed = false;
+
+            // System.out.println("****** re-Start Fusion.");
+
+            ArrayList<TrackSegment> trackSegmentListClone = new ArrayList<TrackSegment>(getTrackSegmentList());
+            for (TrackSegment ts : trackSegmentListClone)
+            {
+                // System.out.println("Computing trackSegment # " + trackSegmentListClone.indexOf( ts ) );
+                if (ts.nextList.size() == 1) // if the track has only one successor.
+                    if (ts.nextList.get(0).previousList.size() == 1) // If successor has only one predecessor.
+                    {
+                        // System.out.println("Fusing...");
+                        fuseTrack(ts, ts.nextList.get(0)); // fuse tracks.
+                        fuseOperationPerformed = true;
+                        break;
+                    }
+            }
+        }
+
+        fireTrackEditorProcessorChange();
+    }
+
+    /**
+     * Fusing 2 tracks ts1 is one step before ts2.
+     */
+    public void fuseTrack(TrackSegment ts1, TrackSegment ts2)
+    {
+        // System.out.println("debug fuse track: fusing ");
+        // System.out.println("ts1 = " + ts1);
+        // System.out.println("ts2 = " + ts2);
+
+        for (Detection detection : ts2.getDetectionList())
+        {
+            ts1.addDetection(detection);
+            // System.out.println("Adding 1 detection to ts1. t=" + detection.getT() );
+        }
+
+        // System.out.println("Copy next List");
+        ts1.nextList = new ArrayList<TrackSegment>(new ArrayList<TrackSegment>(ts2.nextList));
+
+        // ts1.getDetectionList().addAll(ts2.getDetectionList());
+
+        while (ts2.getDetectionList().size() > 0)
+        {
+            Detection detection = ts2.getFirstDetection();
+            ts2.removeDetection(detection);
+            // System.out.println("Remove 1 detection to ts2. t=" + detection.getT() );
+        }
+
+        // System.out.println("Destroying ts2...");
+        deleteTrack(ts2);
+
+        fireTrackEditorProcessorChange();
+    }
+
+    public ArrayList<Detection> getAllDetection()
+    {
+        ArrayList<Detection> detectionList = new ArrayList<Detection>();
+        for (TrackGroup trackGroup : getTrackGroupList())
+            for (TrackSegment tracksegment : trackGroup.getTrackSegmentList())
+                for (Detection detection : tracksegment.getDetectionList())
+                {
+                    detectionList.add(detection);
+                }
+        return detectionList;
+    }
+
+    /** return distance between 2 detections */
+    public double getDistance(Detection d1, Detection d2)
+    {
+        return getDistance(d1.getX(), d1.getY(), d1.getZ(), d2.getX(), d2.getY(), d2.getZ());
+    }
+
+    /** return distance between 2 pos */
+    public double getDistance(double x1, double y1, double z1, double x2, double y2, double z2)
+    {
+        double distance = Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2) + (z1 - z2) * (z1 - z2));
+        return distance;
+    }
+
+    public ArrayList<Link> getLinks()
+    {
+        ArrayList<Link> linkarray = new ArrayList<Link>();
+
+        // System.out.println("debug : getLinks");
+
+        for (int trackSegmentIndex = 0; trackSegmentIndex < getTrackSegmentList().size(); trackSegmentIndex++)
+        {
+            TrackSegment ts = getTrackSegmentList().get(trackSegmentIndex);
+
+            // for ( int i = 0 ; i < ts.previousList.size() ; i++ )
+            // {
+            // linkarray.add( new Link( ts.previousList.get( i ) , ts ) );
+            // }
+            for (int i = 0; i < ts.nextList.size(); i++)
+            {
+                linkarray.add(new Link(ts, ts.nextList.get(i)));
+            }
+
+        }
+
+        return linkarray;
+    }
+
+    // FIXME: put a WeakReference in here
+    private Sequence displaySequence = null;
+
+    public void setDisplaySequence(Sequence displaySequence)
+    {
+
+        this.displaySequence = displaySequence;
+
+        // System.out.println("display sequence changed !");
+
+        // remove this painter from all existing sequences
+        removePainter();
+
+        // add the painter to the selected display sequence.
+        if (displaySequence != null)
+        {
+            // System.out.println("adding the painter");
+            displaySequence.addOverlay(tePainter);
+        }
+        // fire a sequenceChanged to all trackManagerProcessor
+        for (PluginTrackManagerProcessor ptmp : trackManagerProcessorList)
+        {
+            ptmp.displaySequenceChanged();
+        }
+        // tell to trackPanel the display sequence has changed.
+        if (trackManager != null)
+        {
+            if (trackManager.trackPanel != null)
+            {
+                trackManager.trackPanel.displaySequenceChanged();
+            }
+        }
+
+    }
+
+    public Sequence getDisplaySequence()
+    {
+        return displaySequence;
+    }
+
+    TrackManager trackManager;
+
+    /** @deprecated Use getTrackManager instead */
+    public TrackManager getTrackEditor()
+    {
+        return trackManager;
+    }
+
+    public TrackManager getTrackManager()
+    {
+        return trackManager;
+    }
+
+    public TrackManagerPainter getTrackPainter()
+    {
+        return tePainter;
+    }
+
+    /**
+     * @return the pool of tracksegment of all the trackgroup
+     */
+    public ArrayList<TrackSegment> getTrackSegmentList()
+    {
+
+        ArrayList<TrackSegment> trackSegmentList = new ArrayList<TrackSegment>();
+        for (TrackGroup group : getTrackGroupList())
+        {
+            trackSegmentList.addAll(group.getTrackSegmentList());
+        }
+
+        return trackSegmentList;
+    }
+
+    /** find the tracksegment containing the given detection */
+    public TrackSegment getTrackSegmentWithDetection(Detection detection)
+    {
+
+        ArrayList<TrackSegment> trackSegmentList = getTrackSegmentList();
+
+        for (TrackSegment ts : trackSegmentList)
+        {
+            if (ts.containsDetection(detection))
+                return ts;
+        }
+
+        return null;
+    }
+
+    public static ArrayList<TrackSegment> loadTracks(File f) throws Exception
+    {
+
+        ArrayList<TrackSegment> inputTrackSegmentList = new ArrayList<TrackSegment>();
+        ArrayList<TrackSegment> targetTrackSegmentList = new ArrayList<TrackSegment>();
+
+        for (TrackSegment ts : inputTrackSegmentList)
+        {
+            if (ts.getFirstDetection() == null || ts.getLastDetection() == null)
+            {
+                System.out.println("Warning, found and removed empty track segment");
+                continue;
+            }
+
+            boolean skipTrackSegment = false;
+
+            for (TrackSegment ts2 : ts.nextList)
+            {
+                if (ts2.getFirstDetection() == null || ts2.getLastDetection() == null)
+                {
+                    skipTrackSegment = true;
+                    break;
+                }
+            }
+
+            if (skipTrackSegment)
+            {
+                System.out.println("Warning, found and removed empty track segment");
+                continue;
+            }
+
+            targetTrackSegmentList.add(ts);
+        }
+        return targetTrackSegmentList;
+    }
+
+    public void moveTrackToIndex(TrackSegment ts, int index)
+    {
+        // trackSegmentList.remove( ts );
+        // if ( index > trackSegmentList.size() ) index = trackSegmentList.size();
+        // trackSegmentList.add( index , ts );
+    }
+
+    /** remove a link between 2 track segment. */
+    public void removeLink(TrackSegment start, TrackSegment end)
+    {
+        // int nb = 0;
+        // while ( start.nextList.contains( end ) )
+        // {
+        // System.out.println("while next");
+        // nb++;
+        start.nextList.remove(end);
+        // }
+        // while ( end.previousList.contains( start ) )
+        // {
+        // System.out.println("While previous");
+        // nb++;
+        end.previousList.remove(start);
+        // }
+        // if ( nb > 2 )
+        // {
+        // System.err.println("REMOVE WORKED SEVERAL TIMES !");
+        // }
+    }
+
+    public void removeTrackProcessor(PluginTrackManagerProcessor tep)
+    {
+        trackManagerProcessorList.remove(tep);
+        fireTrackEditorProcessorChange();
+    }
+
+    /** remove a listener that will send changes on TrackEditorProcessor's ArrayList */
+    public void removeTrackProcessorListener(TrackManagerProcessorListener tepl)
+    {
+        trackEditorProcessorListener.remove(tepl);
+    }
+
+    public void selectAllTracks()
+    {
+        for (TrackSegment ts : getTrackSegmentList())
+        {
+            ts.setAllDetectionSelected(true);
+        }
+        fireTrackEditorProcessorChange();
+    }
+
+    public void selectTracksByLength(int lowVal, int highVal)
+    {
+
+        for (TrackSegment ts : getTrackSegmentList())
+        {
+            if (ts.getDetectionList().size() >= lowVal && ts.getDetectionList().size() <= highVal)
+            {
+                ts.setAllDetectionSelected(true);
+            }
+        }
+        fireTrackEditorProcessorChange();
+
+    }
+
+    public void unselectAllTracks()
+    {
+        for (TrackSegment ts : getTrackSegmentList())
+        {
+            ts.setAllDetectionSelected(false);
+        }
+        fireTrackEditorProcessorChange();
+    }
+
+    public void invertSelection()
+    {
+        for (TrackSegment ts : getTrackSegmentList())
+            for (Detection d : ts.getDetectionList())
+                d.setSelected(!d.isSelected());
+        fireTrackEditorProcessorChange();
+    }
+
+    /**
+     * Splits a track into 2 tracks.
+     * 
+     * @param ts
+     *        The track to split - Important NOTE: This track will be destructed after call.
+     * @param lastIndexOfFirstTrack
+     *        Index of where the track should be splited.
+     * 
+     *        <pre>
+     * &#64;param CreateLinkBetweenSplittedTrack if true, creates a link between splitted tracks.
+     * &#64;return an ArrayList with the 2 new track created.
+     * Track       : TTTTTT
+     * Split Index :   S
+     * Result      : 111
+     *                  222
+     *        </pre>
+     */
+    public ArrayList<TrackSegment> splitTrackSegment(TrackSegment ts, int lastIndexOfFirstTrack,
+            boolean CreateLinkBetweenSplittedTrack)
+    {
+        // System.out.println("Entering split track segment.");
+
+        // last version, but still need to consider the track group
+        TrackSegment ts1 = new TrackSegment();
+        TrackSegment ts2 = new TrackSegment();
+
+        // copy first segment detections.
+        for (int i = 0; i < lastIndexOfFirstTrack + 1; i++)
+        {
+            // old: ts1.detectionList.add( ts.detectionList.get( i ) );
+            ts1.addDetection(ts.getDetectionAt(i));
+        }
+
+        // copy first segment previous list.
+        ts1.previousList.addAll(ts.previousList);
+
+        // copy second segment detections.
+        for (int i = lastIndexOfFirstTrack + 1; i < ts.getDetectionList().size(); i++)
+        {
+            // old: ts2.detectionList.add( ts.detectionList.get( i ) );
+            ts2.addDetection(ts.getDetectionAt(i));
+        }
+
+        // copy second segment next list.
+        ts2.nextList.addAll(ts.nextList);
+
+        for (TrackSegment tracksegment : getTrackSegmentList())
+        {
+            // change pointer of others previouslisttracks to point here.
+            for (TrackSegment tracksegmentprevious : tracksegment.previousList)
+            {
+                if (tracksegmentprevious == ts)
+                    tracksegmentprevious = ts2;
+            }
+            // change pointer of others nextlisttracks to point here.
+            for (TrackSegment tracksegmentnext : tracksegment.nextList)
+            {
+                if (tracksegmentnext == ts)
+                    tracksegmentnext = ts1;
+            }
+        }
+
+        if (CreateLinkBetweenSplittedTrack)
+        {
+            createLink(ts1, ts2);
+        }
+
+        // this was the general index. Should find in the trackgroup.
+        // int indexOfTs = getTrackSegmentList().indexOf( ts );
+
+        // TrackGroup trackGroupContainingTs;
+        int indexOfTs = ts.getOwnerTrackGroup().getTrackSegmentList().indexOf(ts);
+        // int indexOfTsInGroup = getTrackGroupContainingSegment( ts );
+
+        ts.getOwnerTrackGroup().getTrackSegmentList().add(indexOfTs, ts2);
+        ts.getOwnerTrackGroup().getTrackSegmentList().add(indexOfTs, ts1);
+
+        ts1.setOwnerTrackGroup(ts.getOwnerTrackGroup());
+        ts2.setOwnerTrackGroup(ts.getOwnerTrackGroup());
+
+        //
+        // trackSegmentList.add( indexOfTs , ts2 );
+        // trackSegmentList.add( indexOfTs , ts1 );
+
+        ts.getOwnerTrackGroup().getTrackSegmentList().remove(ts);
+        ts = null;
+
+        // System.out.println("ts1 trackGroup = " + ts1.getOwnerTrackGroup() );
+        // System.out.println("ts2 trackGroup = " + ts1.getOwnerTrackGroup() );
+
+        ArrayList<TrackSegment> trackSegmentReturnList = new ArrayList<TrackSegment>();
+        trackSegmentReturnList.add(ts1);
+        trackSegmentReturnList.add(ts2);
+        return trackSegmentReturnList;
+
+    }
+
+    public ArrayList<TrackGroup> getTrackGroupList()
+    {
+
+        ArrayList<TrackGroup> trackGroupList = new ArrayList<TrackGroup>();
+
+        for (SwimmingObject result : resultList)
+            trackGroupList.add((TrackGroup) result.getObject());
+
+        return trackGroupList;
+    }
+
+    /** List of results where trackGroup has been found to process. */
+    ArrayList<SwimmingObject> resultList = new ArrayList<SwimmingObject>();
+
+    public void addResult(SwimmingObject result)
+    {
+        if (!(result.getObject() instanceof TrackGroup))
+        {
+            // System.out.println("Object " + result + " is not recognized as a TrackGroup.");
+            return;
+        }
+
+        resultList.add(result);
+
+    }
+
+    public void removeResult(SwimmingObject result)
+    {
+        if (result == null)
+            return;
+
+        resultList.remove(result);
+
+        if (result.getObject() instanceof TrackGroup)
+        {
+            // remove track id stored in tracksemgent.idhashmap
+            TrackGroup tg = (TrackGroup) result.getObject();
+            for (TrackSegment ts : tg.getTrackSegmentList())
+            {
+                TrackSegment.idHashMapList.remove(ts);
+            }
+        }
+
+    }
+
+    /**
+     * removes the painter from all sequences.
+     */
+    public void removePainter()
+    {
+
+        // System.out.println("remove painter");
+
+        List<Sequence> sequenceList = Icy.getMainInterface().getSequencesContaining(tePainter);
+        for (Sequence sequence : sequenceList)
+        {
+            sequence.removeOverlay(tePainter);
+        }
+
+    }
+
+    public int getTrackIndex(TrackSegment ts)
+    {
+
+        return getTrackSegmentList().indexOf(ts);
+
+    }
+
+    /**
+     * @return the timepoint corresponding to the last detection of all the trackgroup.
+     */
+    public int getLastDetectionTimePoint()
+    {
+
+        int maxT = 0;
+        for (TrackGroup tg : getTrackGroupList())
+        {
+            for (TrackSegment ts : tg.getTrackSegmentList())
+            {
+                Detection d = ts.getLastDetection();
+                if (d != null)
+                {
+                    if (d.getT() > maxT)
+                        maxT = d.getT();
+                }
+            }
+        }
+        return maxT;
+    }
+
+    /**
+     * @return the number of track considering all the track groups.
+     */
+    public int getTotalNumberOfTrack()
+    {
+        int total = 0;
+        for (TrackGroup tg : getTrackGroupList())
+        {
+            total += tg.getTrackSegmentList().size();
+        }
+        return total;
+    }
+
+}
