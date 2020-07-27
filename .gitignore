@@ -1,2 +1,6 @@
 bin
 pluginfile-track-manager*.jar
+.idea/
+target/
+.settings/
+*.iml
