@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.bioimageanalysis.icy</groupId>
-    <artifactId>track-manager</artifactId>
+    <artifactId>icy-track-manager</artifactId>
     <version>1.4.5</version>
 
     <name>Track Manager</name>
