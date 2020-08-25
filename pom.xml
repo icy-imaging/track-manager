@@ -8,6 +8,8 @@
     <artifactId>icy-track-manager</artifactId>
     <version>1.4.5</version>
 
+    <packaging>jar</packaging>
+
     <name>Track Manager</name>
     <description>
         he track manager enables the use of DSP-like trackProcessors.

@@ -1,6 +1,7 @@
-bin
-pluginfile-track-manager*.jar
 .idea/
-target/
 .settings/
+build/
+target/
 *.iml
+.classpath
+.project
