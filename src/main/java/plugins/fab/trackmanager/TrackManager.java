@@ -907,14 +907,20 @@ public class TrackManager extends PluginActionable
             return;
         }
 
-        Element trackNode = XMLUtil.getElement(document.getDocumentElement().getParentNode(), "Tracks");
+        final Element trackNode = XMLUtil.getElement(document.getDocumentElement().getParentNode(), "Tracks");
+        if (trackNode == null)
+        {
+            MessageDialog.showDialog(
+                    "Unsupported version of TrackMate XML file !\nTry to use the Icy XML export in TrackMate instead and directly load it with 'TrackManager-->File->Load...' command.",
+                    MessageDialog.ERROR_MESSAGE);
+            return;
+        }
+
         String unit = XMLUtil.getAttributeValue(trackNode, "spaceUnits", "pixel");
 
         double unitMultiplicator = 1;
         if (unit == "micron")
-        {
             unitMultiplicator = 0.000001d;
-        }
 
         ArrayList<Element> trackElementList = XMLUtil.getElements(document.getDocumentElement().getParentNode(),
                 "Tracks");
