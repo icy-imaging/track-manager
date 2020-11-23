@@ -10,7 +10,7 @@
         <version>1.0.4</version>
     </parent>
 
-    <artifactId>icy-track-manager</artifactId>
+    <artifactId>track-manager</artifactId>
     <version>1.4.6</version>
 
     <packaging>jar</packaging>
