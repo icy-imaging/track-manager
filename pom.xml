@@ -7,7 +7,7 @@
     <parent>
         <artifactId>pom-icy</artifactId>
         <groupId>org.bioimageanalysis.icy</groupId>
-        <version>1.0.4</version>
+        <version>1.0.6</version>
     </parent>
 
     <artifactId>track-manager</artifactId>
@@ -21,31 +21,11 @@
         This can affect the display of tracks, selection in time or by ROIs, and also compute some views like the overlaid and animated local flow graph, polar graph.
     </description>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jdk.version>1.8</jdk.version>
-
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
-            <artifactId>icy-kernel</artifactId>
-            <version>2.1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.bioimageanalysis.icy</groupId>
-            <artifactId>icy-connected-components</artifactId>
-            <version>4.8.5</version>
+            <artifactId>connected-components</artifactId>
+            <version>${connected-components.version}</version>
         </dependency>
     </dependencies>
-
-    <repositories>
-        <repository>
-            <id>icy</id>
-            <url>https://icy-nexus.pasteur.fr/repository/Icy/</url>
-        </repository>
-    </repositories>
 </project>
