@@ -4,10 +4,11 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <!-- Inherited Icy Parent POM -->
     <parent>
         <groupId>org.bioimageanalysis.icy</groupId>
         <artifactId>parent-pom-plugin</artifactId>
-        <version>1.0.1</version>
+        <version>1.0.3</version>
     </parent>
 
     <artifactId>track-manager</artifactId>
@@ -25,7 +26,7 @@
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
             <artifactId>connected-components</artifactId>
-            <version>${connected-components.version}</version>
+            <version>4.8.7</version>
         </dependency>
     </dependencies>
 
