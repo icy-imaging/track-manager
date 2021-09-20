@@ -8,11 +8,11 @@
     <parent>
         <groupId>org.bioimageanalysis.icy</groupId>
         <artifactId>parent-pom-plugin</artifactId>
-        <version>1.0.3</version>
+        <version>1.0.5</version>
     </parent>
 
     <artifactId>track-manager</artifactId>
-    <version>1.4.6</version>
+    <version>1.5.0</version>
 
     <packaging>jar</packaging>
 
