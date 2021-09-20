@@ -86,26 +86,39 @@ public class TrackPool
         fireTrackEditorProcessorChange();
     }
 
+    public static boolean linkExists(List<Link> links, TrackSegment start, TrackSegment end)
+    {
+        // check if the link already exists
+        for (Link link : links)
+            if ((link.start == start) && (link.end == end))
+                return true;
+
+        return false;
+    }
+
+    public static boolean isLinkExists(List<TrackGroup> groups, TrackSegment start, TrackSegment end)
+    {
+        return linkExists(getLinks(groups), start, end);
+    }
+
     public boolean isLinkExists(TrackSegment start, TrackSegment end)
     {
-        for (Link link : getLinks()) // check if the link already exists.
+        return linkExists(getLinks(), start, end);
+    }
+
+    public static void createLink(List<TrackGroup> groups, TrackSegment start, TrackSegment end)
+    {
+        if (!isLinkExists(groups, start, end))
         {
-            if (link.start == start && link.end == end)
-            {
-                return true;
-            }
+            start.nextList.add(end);
+            end.previousList.add(start);
         }
-        return false;
     }
 
     public void createLink(TrackSegment start, TrackSegment end)
     {
-        boolean alreadyExist = false;
-        alreadyExist = isLinkExists(start, end);
-
-        if (!alreadyExist)
+        if (!isLinkExists(start, end))
         {
-            // System.out.println("create a new link.");
             start.nextList.add(end);
             end.previousList.add(start);
         }
@@ -539,6 +552,18 @@ public class TrackPool
         return linkarray;
     }
 
+    public static List<Link> getLinks(List<TrackGroup> groups)
+    {
+        final List<Link> result = new ArrayList<Link>();
+        final List<TrackSegment> segments = getTrackSegmentList(groups);
+
+        for (TrackSegment segment : segments)
+            for (int i = 0; i < segment.nextList.size(); i++)
+                result.add(new Link(segment, segment.nextList.get(i)));
+
+        return result;
+    }
+
     // FIXME: put a WeakReference in here
     private Sequence displaySequence = null;
 
@@ -595,6 +620,19 @@ public class TrackPool
     public TrackManagerPainter getTrackPainter()
     {
         return tePainter;
+    }
+
+    /**
+     * @return the pool of tracksegment of all the trackgroup
+     */
+    public static List<TrackSegment> getTrackSegmentList(List<TrackGroup> groups)
+    {
+        final List<TrackSegment> result = new ArrayList<TrackSegment>();
+
+        for (TrackGroup group : groups)
+            result.addAll(group.getTrackSegmentList());
+
+        return result;
     }
 
     /**
@@ -876,14 +914,12 @@ public class TrackPool
 
         if (result.getObject() instanceof TrackGroup)
         {
-            // remove track id stored in tracksemgent.idhashmap
-            TrackGroup tg = (TrackGroup) result.getObject();
-            for (TrackSegment ts : tg.getTrackSegmentList())
-            {
-                TrackSegment.idHashMapList.remove(ts);
-            }
-        }
+            final TrackGroup tg = (TrackGroup) result.getObject();
 
+            // remove track segment from hash map
+            for (TrackSegment ts : tg.getTrackSegmentList())
+                ts.removeId();
+        }
     }
 
     /**

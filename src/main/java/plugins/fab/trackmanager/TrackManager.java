@@ -766,7 +766,6 @@ public class TrackManager extends PluginActionable
 
     private void loadTracks()
     {
-
         JFileChooser chooser = new JFileChooser();
         chooser.setDialogTitle("Select track.xml file.");
 
@@ -784,102 +783,102 @@ public class TrackManager extends PluginActionable
 
         preferences.put("path", chooser.getCurrentDirectory().getAbsolutePath());
 
-        File file = chooser.getSelectedFile();
-
-        Document document = XMLUtil.loadDocument(file);
-
-        if (document == null)
+        try
         {
-            MessageDialog.showDialog("Invalid track file: no document to open", MessageDialog.ERROR_MESSAGE);
-            return;
-        }
+            final List<TrackGroup> groups = loadTracks(chooser.getSelectedFile().getAbsolutePath());
 
-        Element versionElement = XMLUtil.getElement(document.getDocumentElement(), "trackfile");
-        if (versionElement == null)
-        {
-            MessageDialog.showDialog("Invalid track file: the tag trackfile is missing.", MessageDialog.ERROR_MESSAGE);
-            return;
-        }
-
-        ArrayList<Element> trackGroupElementList = XMLUtil.getElements(document.getDocumentElement(), "trackgroup");
-
-        for (Element trackGroupElement : trackGroupElementList)
-        {
-
-            ArrayList<Element> trackSegmentElementList = XMLUtil.getElements(trackGroupElement);
-            TrackGroup trackGroup = new TrackGroup(null);
-            String groupDescription = XMLUtil.getAttributeValue(trackGroupElement, "description", "no description");
-            trackGroup.setDescription(groupDescription);
-
-            for (Element trackSegmentElement : trackSegmentElementList)
+            // add group to swimming pool
+            for (TrackGroup group : groups)
             {
+                SwimmingObject so = new SwimmingObject(group);
+                Icy.getMainInterface().getSwimmingPool().add(so);
+            }
 
-                TrackSegment trackSegment = new TrackSegment();
-                int id = XMLUtil.getAttributeIntValue(trackSegmentElement, "id", -1);
+            trackPool.fireTrackEditorProcessorChange();
+        }
+        catch (IllegalArgumentException ex)
+        {
+            MessageDialog.showDialog(ex.getMessage(), MessageDialog.ERROR_MESSAGE);
+            return;
+        }
+    }
+
+    public static List<TrackGroup> loadTracks(String path) throws IllegalArgumentException
+    {
+        final Document document = XMLUtil.loadDocument(path, false);
+        return loadTracks(document);
+    }
+
+    public static List<TrackGroup> loadTracks(Document document) throws IllegalArgumentException
+    {
+        if (document == null)
+            throw new IllegalArgumentException("Invalid track file !");
+
+        final Element rootElement = document.getDocumentElement();
+
+        if (XMLUtil.getElement(rootElement, "trackfile") == null)
+            throw new IllegalArgumentException("Invalid track file: the tag trackfile is missing.");
+
+        final List<TrackGroup> result = new ArrayList<>();
+
+        for (Element trackGroupElement : XMLUtil.getElements(rootElement, "trackgroup"))
+        {
+            // create track group
+            final TrackGroup trackGroup = new TrackGroup(null);
+            trackGroup.setDescription(XMLUtil.getAttributeValue(trackGroupElement, "description", "no description"));
+
+            for (Element trackSegmentElement : XMLUtil.getElements(trackGroupElement))
+            {
+                // create track segment
+                final TrackSegment trackSegment = new TrackSegment();
+                final int id = XMLUtil.getAttributeIntValue(trackSegmentElement, "id", -1);
+
                 if (id == -1)
                     trackSegment.generateId();
                 else
                     trackSegment.setId(id);
-                // trackSegment.setId( Integer.parseInt( trackSegmentElement.getAttribute("id") ) );
 
-                ArrayList<Element> detectionElementList = XMLUtil.getElements(trackSegmentElement);
-
-                for (Element detectionElement : detectionElementList)
+                for (Element detectionElement : XMLUtil.getElements(trackSegmentElement))
                 {
+                    // create detection
+                    final Detection detection = Detection.createDetection(XMLUtil.getAttributeValue(detectionElement,
+                            "classname", "plugins.nchenouard.spot.Detection"));
 
-                    String className = XMLUtil.getAttributeValue(detectionElement, "classname",
-                            "plugins.nchenouard.spot.Detection");
-
-                    Detection detection = Detection.createDetection(className);
-
+                    // load it
                     detection.loadFromXML(detectionElement);
-
+                    // add to track segement
                     trackSegment.addDetection(detection);
                 }
 
+                // add track segment to track group
                 trackGroup.addTrackSegment(trackSegment);
             }
-
-            SwimmingObject so = new SwimmingObject(trackGroup);
-            Icy.getMainInterface().getSwimmingPool().add(so);
-
+            
+            // add track group to result
+            result.add(trackGroup);
         }
 
-        // load links.
-
-        ArrayList<Element> linkList = XMLUtil.getElements(document.getDocumentElement(), "linklist");
+        // get links
+        for (Element linkListElement : XMLUtil.getElements(rootElement, "linklist"))
         {
-            for (Element linkListElement : linkList)
+            for (Element link : XMLUtil.getElements(linkListElement))
             {
-                ArrayList<Element> trackSegmentElementList = XMLUtil.getElements(linkListElement);
-                for (Element link : trackSegmentElementList)
-                {
-                    int idFrom = XMLUtil.getAttributeIntValue(link, "from", -1);
-                    int idTo = XMLUtil.getAttributeIntValue(link, "to", -1);
+                final int idFrom = XMLUtil.getAttributeIntValue(link, "from", -1);
+                final int idTo = XMLUtil.getAttributeIntValue(link, "to", -1);
 
-                    TrackSegment from = TrackSegment.getTrackSegmentById(idFrom);
-                    TrackSegment to = TrackSegment.getTrackSegmentById(idTo);
+                final TrackSegment from = TrackSegment.getTrackSegmentById(idFrom);
+                final TrackSegment to = TrackSegment.getTrackSegmentById(idTo);
 
-                    // System.out.println( "track from: " + idFrom + " "+ from );
-                    // System.out.println( "track to: " + idTo + " "+ to );
-
-                    // System.out.println( "Checking null... ");
-
-                    if (from != null && to != null)
-                    {
-                        // System.out.println("TrackManager : from : " + from + " to " + to );
-                        trackPool.createLink(from, to);
-                    }
-                }
+                if (from != null && to != null)
+                    TrackPool.createLink(result, from, to);
             }
         }
 
-        trackPool.fireTrackEditorProcessorChange();
+        return result;
     }
 
     private void loadTracksFromTrackMate()
     {
-
         JFileChooser chooser = new JFileChooser();
         chooser.setDialogTitle("Import TrackMate xml track file.");
 
@@ -897,81 +896,86 @@ public class TrackManager extends PluginActionable
 
         preferences.put("path", chooser.getCurrentDirectory().getAbsolutePath());
 
-        File file = chooser.getSelectedFile();
-
-        Document document = XMLUtil.loadDocument(file);
-
-        if (document == null)
+        try
         {
-            MessageDialog.showDialog("Invalid track file: no document to open", MessageDialog.ERROR_MESSAGE);
+            final List<TrackGroup> groups = loadTracksFromTrackMate(chooser.getSelectedFile().getAbsolutePath());
+
+            // add group to swimming pool
+            for (TrackGroup group : groups)
+            {
+                SwimmingObject so = new SwimmingObject(group);
+                Icy.getMainInterface().getSwimmingPool().add(so);
+            }
+
+            trackPool.fireTrackEditorProcessorChange();
+        }
+        catch (IllegalArgumentException ex)
+        {
+            MessageDialog.showDialog(ex.getMessage(), MessageDialog.ERROR_MESSAGE);
             return;
         }
+    }
+
+    public static List<TrackGroup> loadTracksFromTrackMate(String path)
+    {
+        final Document document = XMLUtil.loadDocument(path, false);
+        return loadTracksFromTrackMate(document);
+    }
+
+    public static List<TrackGroup> loadTracksFromTrackMate(Document document) throws IllegalArgumentException
+    {
+        if (document == null)
+            throw new IllegalArgumentException("Invalid track file !");
 
         final Element trackNode = XMLUtil.getElement(document.getDocumentElement().getParentNode(), "Tracks");
         if (trackNode == null)
-        {
-            MessageDialog.showDialog(
-                    "Unsupported version of TrackMate XML file !\nTry to use the Icy XML export in TrackMate instead and directly load it with 'TrackManager-->File->Load...' command.",
-                    MessageDialog.ERROR_MESSAGE);
-            return;
-        }
+            throw new IllegalArgumentException(
+                    "Unsupported version of TrackMate XML file !\nTry to use the Icy XML export in TrackMate instead and directly load it with 'TrackManager-->File->Load...' command.");
 
-        String unit = XMLUtil.getAttributeValue(trackNode, "spaceUnits", "pixel");
+        final List<TrackGroup> result = new ArrayList<>();
+        final String unit = XMLUtil.getAttributeValue(trackNode, "spaceUnits", "pixel");
 
         double unitMultiplicator = 1;
         if (unit == "micron")
             unitMultiplicator = 0.000001d;
 
-        ArrayList<Element> trackElementList = XMLUtil.getElements(document.getDocumentElement().getParentNode(),
-                "Tracks");
-
-        // XMLUtil.getAttribute( trackElementList , attribute)
-        // trackElementList
-
-        for (Element trackElement : trackElementList)
+        for (Element trackElement : XMLUtil.getElements(document.getDocumentElement().getParentNode(), "Tracks"))
         {
+            // create track group
+            final TrackGroup trackGroup = new TrackGroup(null);
+            trackGroup.setDescription(XMLUtil.getAttributeValue(trackElement, "description", "no description"));
 
-            ArrayList<Element> trackSegmentElementList = XMLUtil.getElements(trackElement);
-            TrackGroup trackGroup = new TrackGroup(null);
-            String groupDescription = XMLUtil.getAttributeValue(trackElement, "description", "no description");
-            trackGroup.setDescription(groupDescription);
-
-            for (Element trackSegmentElement : trackSegmentElementList) // particle tag
+            for (Element trackSegmentElement : XMLUtil.getElements(trackElement))
             {
+                // create track segment
+                final TrackSegment trackSegment = new TrackSegment();
 
-                TrackSegment trackSegment = new TrackSegment();
-                int id = XMLUtil.getAttributeIntValue(trackSegmentElement, "id", -1);
+                final int id = XMLUtil.getAttributeIntValue(trackSegmentElement, "id", -1);
                 if (id == -1)
-                {
                     trackSegment.generateId();
-                }
                 else
-                {
                     trackSegment.setId(id);
-                }
 
-                ArrayList<Element> detectionElementList = XMLUtil.getElements(trackSegmentElement);
-
-                for (Element detectionElement : detectionElementList)
+                for (Element detectionElement : XMLUtil.getElements(trackSegmentElement))
                 {
+                    // create detection
+                    final Detection detection = Detection.createDetection("plugins.nchenouard.spot.Detection");
 
-                    Detection detection = Detection.createDetection("plugins.nchenouard.spot.Detection");
-
+                    // load it
                     detection.loadFromXML(detectionElement);
-
+                    // add to track segment
                     trackSegment.addDetection(detection);
-
                 }
 
+                // add track segment to group
                 trackGroup.addTrackSegment(trackSegment);
             }
-
-            SwimmingObject so = new SwimmingObject(trackGroup);
-            Icy.getMainInterface().getSwimmingPool().add(so);
-
+            
+            // add track group to result
+            result.add(trackGroup);
         }
 
-        trackPool.fireTrackEditorProcessorChange();
+        return result;
     }
 
     private void debug()
@@ -991,7 +995,6 @@ public class TrackManager extends PluginActionable
 
     private void saveTracks()
     {
-
         JFileChooser chooser = new JFileChooser();
         chooser.setDialogTitle("Select track.xml file.");
         chooser.setFileFilter(new FileNameExtensionFilter("XML track file", "xml"));
@@ -1008,30 +1011,41 @@ public class TrackManager extends PluginActionable
 
         preferences.put("path", chooser.getCurrentDirectory().getAbsolutePath());
 
-        File file = chooser.getSelectedFile();
+        saveTracks(chooser.getSelectedFile().getAbsolutePath(), trackPool.getTrackGroupList());
+    }
 
-        file = new File(FileUtil.setExtension(file.getAbsolutePath(), ".xml"));
+    public static void saveTracks(String path, List<TrackGroup> groups)
+    {
+        // get file
+        final File file = new File(FileUtil.setExtension(path, ".xml"));
+        // generate document
+        final Document document = saveTracks(groups);
+        // save it
+        XMLUtil.saveDocument(document, file);
+    }
 
-        Document document = XMLUtil.createDocument(true);
+    public static Document saveTracks(List<TrackGroup> groups)
+    {
+        final Document result = XMLUtil.createDocument(true);
+        final Element rootElement = result.getDocumentElement();
 
-        Element versionElement = XMLUtil.addElement(document.getDocumentElement(), "trackfile");
+        final Element versionElement = XMLUtil.addElement(rootElement, "trackfile");
         versionElement.setAttribute("version", "1");
 
-        for (TrackGroup trackGroup : trackPool.getTrackGroupList())
+        for (TrackGroup trackGroup : groups)
         {
-            Element trackGroupElement = XMLUtil.addElement(document.getDocumentElement(), "trackgroup");
+            final Element trackGroupElement = XMLUtil.addElement(rootElement, "trackgroup");
             trackGroupElement.setAttribute("description", trackGroup.getDescription());
 
             for (TrackSegment trackSegment : trackGroup.getTrackSegmentList())
             {
-                Element trackElement = XMLUtil.addElement(trackGroupElement, "track");
+                final Element trackElement = XMLUtil.addElement(trackGroupElement, "track");
                 trackElement.setAttribute("id", "" + trackSegment.getId());
-
-                // System.out.println("Saving track : id : " + trackSegment.getId() );
 
                 for (Detection detection : trackSegment.getDetectionList())
                 {
-                    Element detectionElement = XMLUtil.addElement(trackElement, "detection");
+                    final Element detectionElement = XMLUtil.addElement(trackElement, "detection");
+
                     detectionElement.setAttribute("classname", detection.getClass().getName());
                     // detectionElement.setAttribute( "x", ""+detection.x );
                     // detectionElement.setAttribute( "y", ""+detection.y );
@@ -1039,27 +1053,20 @@ public class TrackManager extends PluginActionable
                     // detectionElement.setAttribute( "t", ""+detection.t );
                     detection.saveToXML(detectionElement);
                 }
-
             }
-
         }
 
         // save links
-
-        Element linklistElement = XMLUtil.addElement(document.getDocumentElement(), "linklist");
-        for (Link link : trackPool.getLinks())
+        final Element linklistElement = XMLUtil.addElement(rootElement, "linklist");
+        for (Link link : TrackPool.getLinks(groups))
         {
-            Element trackElement = XMLUtil.addElement(linklistElement, "link");
+            final Element trackElement = XMLUtil.addElement(linklistElement, "link");
 
             trackElement.setAttribute("from", "" + link.getStartSegment().getId());
             trackElement.setAttribute("to", "" + link.getEndSegment().getId());
-            // System.out.println("saving link.");
-            // System.out.println("from Id: " + link.getStartSegment().getId() );
-            // System.out.println("to Id: " + link.getEndSegment().getId() );
         }
 
-        XMLUtil.saveDocument(document, file);
-
+        return result;
     }
 
     /**

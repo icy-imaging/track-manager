@@ -18,6 +18,8 @@
  */
 package plugins.fab.trackmanager;
 
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,8 +37,8 @@ import plugins.nchenouard.spot.Detection;
 
 public class TrackSegment implements Cloneable
 {
-    protected static Map<TrackSegment, Integer> idHashMapList = new HashMap<TrackSegment, Integer>(); // 1-1 hashmap.
-    protected static Map<Integer, TrackSegment> idKeyHashMapList = new HashMap<Integer, TrackSegment>(); // 1-1 hashmap.
+    // better to use weak reference in the map 
+    protected static Map<Integer, Reference<TrackSegment>> idKeyHashMapList = new HashMap<Integer, Reference<TrackSegment>>(); // 1-1 hashmap.
 
     List<Detection> detectionList = new ArrayList<Detection>();
     List<TrackSegment> previousList = new ArrayList<TrackSegment>();
@@ -46,9 +48,19 @@ public class TrackSegment implements Cloneable
 
     public static TrackSegment getTrackSegmentById(int id)
     {
+        final Integer iid = Integer.valueOf(id);
+
         synchronized (idKeyHashMapList)
         {
-            return idKeyHashMapList.get(Integer.valueOf(id));
+            final Reference<TrackSegment> ref = idKeyHashMapList.get(iid);
+
+            // null ? --> can remove it from the hashmap
+            if (ref.get() == null)
+            {
+                idKeyHashMapList.remove(iid);
+            }
+
+            return ref.get();
         }
     }
 
@@ -104,11 +116,7 @@ public class TrackSegment implements Cloneable
     {
         synchronized (idKeyHashMapList)
         {
-            synchronized (idHashMapList)
-            {
-                idKeyHashMapList.remove(Integer.valueOf(id));
-                idHashMapList.remove(this);
-            }
+            idKeyHashMapList.remove(Integer.valueOf(id));
         }
     }
 
@@ -124,22 +132,17 @@ public class TrackSegment implements Cloneable
 
         synchronized (idKeyHashMapList)
         {
-            synchronized (idHashMapList)
+            while (true)
             {
-                while (true)
+                final Integer key = Integer.valueOf(Random.nextInt());
+
+                // available ?
+                if (idKeyHashMapList.get(key) == null)
                 {
-                    final Integer key = Integer.valueOf(Random.nextInt());
+                    idKeyHashMapList.put(key, new WeakReference<TrackSegment>(this));
+                    id = key.intValue();
 
-                    // available ?
-                    if (idKeyHashMapList.get(key) == null)
-                    {
-                        idHashMapList.put(this, key);
-                        idKeyHashMapList.put(key, this);
-
-                        this.id = key.intValue();
-
-                        return;
-                    }
+                    return;
                 }
             }
         }
@@ -151,19 +154,14 @@ public class TrackSegment implements Cloneable
 
         synchronized (idKeyHashMapList)
         {
-            synchronized (idHashMapList)
+            // available ?
+            if (idKeyHashMapList.get(key) == null)
             {
-                // available ?
-                if (idKeyHashMapList.get(key) == null)
-                {
-                    idHashMapList.put(this, key);
-                    idKeyHashMapList.put(key, this);
-
-                    this.id = key.intValue();
-                }
-                else
-                    System.out.println("track id already loaded");
+                idKeyHashMapList.put(key, new WeakReference<TrackSegment>(this));
+                this.id = key.intValue();
             }
+            else
+                System.out.println("track id already loaded");
         }
     }
 
