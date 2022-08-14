@@ -6,9 +6,9 @@
 
     <!-- Inherited Icy Parent POM -->
     <parent>
+		<artifactId>pom-icy</artifactId>
         <groupId>org.bioimageanalysis.icy</groupId>
-        <artifactId>parent-pom-plugin</artifactId>
-        <version>1.0.5</version>
+        <version>2.0.0</version>
     </parent>
 
     <artifactId>track-manager</artifactId>
@@ -21,12 +21,26 @@
         he track manager enables the use of DSP-like trackProcessors.
         This can affect the display of tracks, selection in time or by ROIs, and also compute some views like the overlaid and animated local flow graph, polar graph.
     </description>
+	
+	<profiles>
+		<profile>
+			<id>icy-plugin</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+		</profile>
+	</profiles>
 
     <dependencies>
         <dependency>
             <groupId>org.bioimageanalysis.icy</groupId>
+            <artifactId>icy-kernel</artifactId>
+			<version>${icy-kernel.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bioimageanalysis.icy</groupId>
             <artifactId>connected-components</artifactId>
-            <version>4.8.7</version>
+			<version>${connected-components.version}</version>
         </dependency>
     </dependencies>
 
