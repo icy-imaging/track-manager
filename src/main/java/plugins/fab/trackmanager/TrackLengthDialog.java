@@ -12,56 +12,54 @@ import javax.swing.JTextField;
 
 public class TrackLengthDialog implements ActionListener {
 
-	JTextField textField= new JTextField("3-10");
-	TrackPool trackPool;
-	
-	public TrackLengthDialog( TrackPool trackPool ) {
+    JTextField textField = new JTextField("3-10");
+    TrackPool trackPool;
 
-		this.trackPool = trackPool;
-		ActionDialog actionDialog = new ActionDialog("Select by length");
-    	actionDialog.getContentPane().setLayout( 
-    			new BoxLayout( actionDialog.getContentPane(), BoxLayout.PAGE_AXIS ) );
+    public TrackLengthDialog(TrackPool trackPool) {
 
-    	actionDialog.getContentPane().add( GuiUtil.createLineBoxPanel( new JLabel("Use the syntax: from-to (in number of frame):" ) ) );
-    	actionDialog.getContentPane().add( GuiUtil.createLineBoxPanel( textField ) );
-    	
-    	actionDialog.pack();
-    	actionDialog.setLocationRelativeTo( null );
-    	
-    	actionDialog.setOkAction( this );
-    	actionDialog.setVisible( true );
-    
-		
-	}
+        this.trackPool = trackPool;
+        ActionDialog actionDialog = new ActionDialog("Select by length");
+        actionDialog.getContentPane().setLayout(
+                new BoxLayout(actionDialog.getContentPane(), BoxLayout.PAGE_AXIS));
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
+        actionDialog.getContentPane().add(GuiUtil.createLineBoxPanel(new JLabel("Use the syntax: from-to (in number of frame):")));
+        actionDialog.getContentPane().add(GuiUtil.createLineBoxPanel(textField));
 
-		String text = textField.getText();
+        actionDialog.pack();
+        actionDialog.setLocationRelativeTo(null);
 
-		String[] values = text.split("-");
-		int lowVal = 0;
-		int highVal = Integer.MAX_VALUE;
-		try
-		{
-			lowVal = Integer.parseInt( values[0] );        		
-		} catch ( Exception e1 )
-		{
-			lowVal = 0;
-		}
-		try
-		{
-			highVal = Integer.parseInt( values[1] );
-		} catch ( Exception e1 )
-		{
-			highVal = Integer.MAX_VALUE;
-		}
+        actionDialog.setOkAction(this);
+        actionDialog.setVisible(true);
 
-		System.out.println( "low val : " +lowVal );
-		System.out.println( "high val : " +highVal );
 
-		trackPool.selectTracksByLength( lowVal , highVal );
-		
-		
-	}
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+
+        String text = textField.getText();
+
+        String[] values = text.split("-");
+        int lowVal;
+        int highVal;
+        try {
+            lowVal = Integer.parseInt(values[0]);
+        }
+        catch (Exception e1) {
+            lowVal = 0;
+        }
+        try {
+            highVal = Integer.parseInt(values[1]);
+        }
+        catch (Exception e1) {
+            highVal = Integer.MAX_VALUE;
+        }
+
+        System.out.println("low val : " + lowVal);
+        System.out.println("high val : " + highVal);
+
+        trackPool.selectTracksByLength(lowVal, highVal);
+
+
+    }
 }

@@ -1,20 +1,20 @@
 /*
- * Copyright 2010, 2011 Institut Pasteur.
- * 
+ * Copyright 2010-2023 Institut Pasteur.
+ *
  * This file is part of ICY.
- * 
+ *
  * ICY is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * ICY is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with ICY. If not, see <http://www.gnu.org/licenses/>.
+ * along with ICY. If not, see <https://www.gnu.org/licenses/>.
  */
 package plugins.fab.trackmanager;
 
@@ -32,12 +32,13 @@ import icy.gui.component.PopupPanel;
 import icy.gui.util.GuiUtil;
 import icy.plugin.abstract_.Plugin;
 
-public abstract class PluginTrackManagerProcessor extends Plugin
-{
+public abstract class PluginTrackManagerProcessor extends Plugin {
 
-    /** Panel to used by herited class to display data */
+    /**
+     * Panel to used by inherited class to display data
+     */
     protected JPanel panel = new JPanel();
-    private PopupPanel mainpanel = new PopupPanel("no name");
+    private final PopupPanel mainPanel = new PopupPanel("no name");
 
     protected TrackPool trackPool;
     protected JCheckBox enabledCheckBox = new JCheckBox("Enable");
@@ -47,9 +48,8 @@ public abstract class PluginTrackManagerProcessor extends Plugin
     protected JLabel performanceLabel = new JLabel("----");
     ActionButton actionButton = new ActionButton();
 
-    public PluginTrackManagerProcessor()
-    {
-        mainpanel.expand();
+    public PluginTrackManagerProcessor() {
+        mainPanel.expand();
 
         enabledCheckBox.setSelected(true);
         enabledCheckBox.addActionListener(actionButton);
@@ -66,82 +66,75 @@ public abstract class PluginTrackManagerProcessor extends Plugin
         moveUpButton.addActionListener(actionButton);
         moveDownButton.addActionListener(actionButton);
 
-        mainpanel.getMainPanel().setLayout(new BoxLayout(mainpanel.getMainPanel(), BoxLayout.PAGE_AXIS));
+        mainPanel.getMainPanel().setLayout(new BoxLayout(mainPanel.getMainPanel(), BoxLayout.PAGE_AXIS));
 
-        mainpanel.getMainPanel().add(GuiUtil.createLineBoxPanel(commandPanel));
-        mainpanel.getMainPanel().add(GuiUtil.createLineBoxPanel(panel));
+        mainPanel.getMainPanel().add(GuiUtil.createLineBoxPanel(commandPanel));
+        mainPanel.getMainPanel().add(GuiUtil.createLineBoxPanel(panel));
     }
 
-    protected void setName(String name)
-    {
-        mainpanel.setTitle(name);
+    protected void setName(String name) {
+        mainPanel.setTitle(name);
     }
 
-    protected boolean isEnabled()
-    {
+    protected boolean isEnabled() {
         return enabledCheckBox.isSelected();
     }
 
-    class ActionButton implements ActionListener
-    {
-        public void actionPerformed(ActionEvent e)
-        {
+    class ActionButton implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
 
-            if (e.getSource() == closeButton)
-            {
+            if (e.getSource() == closeButton) {
                 Close();
                 removeTrackProcessor();
                 trackPool.fireTrackEditorProcessorChange();
             }
-            if (e.getSource() == enabledCheckBox)
-            {
+            if (e.getSource() == enabledCheckBox) {
                 trackPool.fireTrackEditorProcessorChange();
             }
-            if (e.getSource() == moveUpButton)
-            {
+            if (e.getSource() == moveUpButton) {
                 trackPool.getTrackManager().moveTrackProcessor(PluginTrackManagerProcessor.this, -1);
             }
-            if (e.getSource() == moveDownButton)
-            {
+            if (e.getSource() == moveDownButton) {
                 trackPool.getTrackManager().moveTrackProcessor(PluginTrackManagerProcessor.this, +1);
             }
         }
     }
 
-    /** Override this function to perform special action before destroying the TrackProcessor. */
+    /**
+     * Override this function to perform special action before destroying the TrackProcessor.
+     */
     public abstract void Close();
 
-    /** Override this to affect data on detection (color (...) ) */
+    /**
+     * Override this to affect data on detection (color (...) )
+     */
     public abstract void Compute();
 
-    public void setPerformance(int ms)
-    {
+    public void setPerformance(int ms) {
         performanceLabel.setText(ms + " ms ");
     }
 
-    private void removeTrackProcessor()
-    {
+    private void removeTrackProcessor() {
         trackPool.removeTrackProcessor(this);
-        JPanel parent = (JPanel) mainpanel.getParent();
-        parent.remove(mainpanel);
+        JPanel parent = (JPanel) mainPanel.getParent();
+        parent.remove(mainPanel);
         parent.revalidate();
     }
 
-    /** Return the Panel Control of this TrackProcessor */
-    public JPanel getPanel()
-    {
-        return mainpanel;
+    /**
+     * Return the Panel Control of this TrackProcessor
+     */
+    public JPanel getPanel() {
+        return mainPanel;
     }
 
     @Override
-    protected void finalize() throws Throwable
-    {
+    protected void finalize() throws Throwable {
         trackPool = null;
         super.finalize();
     }
 
-    public final void setTrackPool(TrackPool trackPool)
-    {
+    public final void setTrackPool(TrackPool trackPool) {
         this.trackPool = trackPool;
     }
 

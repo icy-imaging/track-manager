@@ -1,20 +1,20 @@
 /*
- * Copyright 2010, 2011 Institut Pasteur.
- * 
+ * Copyright 2010-2023 Institut Pasteur.
+ *
  * This file is part of ICY.
- * 
+ *
  * ICY is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * ICY is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with ICY. If not, see <http://www.gnu.org/licenses/>.
+ * along with ICY. If not, see <https://www.gnu.org/licenses/>.
  */
 package plugins.fab.trackmanager;
 
@@ -78,58 +78,50 @@ import plugins.nchenouard.spot.Detection;
 /**
  * @author Fabrice de Chaumont
  */
-public class TrackManager extends PluginActionable
-        implements AdjustmentListener, ActionListener, SwimmingPoolListener, IcyFrameListener
-{
+public class TrackManager extends PluginActionable implements AdjustmentListener, ActionListener, SwimmingPoolListener, IcyFrameListener {
 
-    /**
+    /*
      * List of active trackEditor shared between trackeditors (not used anymore)
      */
     // private static ArrayList<TrackManager> trackManagerList = new ArrayList<TrackManager>();
 
-    /** is this track manager not used anymore (TODO:Should change to a listener structure.) */
+    /**
+     * is this track manager not used anymore (TODO:Should change to a listener structure.)
+     */
     boolean trackManagerDestroyed = false;
 
-    public boolean isTrackManagerDestroyed()
-    {
+    public boolean isTrackManagerDestroyed() {
         return trackManagerDestroyed;
     }
 
-    private class MenuItemActionListener implements ActionListener
-    {
+    private class MenuItemActionListener implements ActionListener {
         Class<? extends PluginTrackManagerProcessor> pluginTrackManagerProcessor;
         PluginDescriptor pluginDescriptor;
 
         public MenuItemActionListener(PluginDescriptor pluginDescriptor,
-                Class<? extends PluginTrackManagerProcessor> pluginTrackEditorProcessor)
-        {
+                                      Class<? extends PluginTrackManagerProcessor> pluginTrackEditorProcessor) {
             this.pluginTrackManagerProcessor = pluginTrackEditorProcessor;
             this.pluginDescriptor = pluginDescriptor;
         }
 
         @Override
-        public void actionPerformed(ActionEvent event)
-        {
+        public void actionPerformed(ActionEvent event) {
             loadTrackProcessor(pluginDescriptor);
         }
 
     }
 
-    void loadTrackProcessor(PluginDescriptor pluginDescriptor)
-    {
+    void loadTrackProcessor(PluginDescriptor pluginDescriptor) {
 
         PluginTrackManagerProcessor ptep = null;
-        try
-        {
-            ptep = (PluginTrackManagerProcessor) pluginDescriptor.getPluginClass().newInstance();
+        try {
+            ptep = (PluginTrackManagerProcessor) pluginDescriptor.getPluginClass().getDeclaredConstructor().newInstance();
         }
-        catch (Exception e)
-        {
+        catch (Exception e) {
             e.printStackTrace();
         }
 
-        if (ptep == null)
-        {
+        if (ptep == null) {
             System.out.println("Can't load processor.");
             return;
         }
@@ -143,24 +135,21 @@ public class TrackManager extends PluginActionable
 
     }
 
-    public TrackPool getTrackPool()
-    {
+    public TrackPool getTrackPool() {
         return trackPool;
     }
 
-    void rebuildTrackProcessorDisplay()
-    {
+    void rebuildTrackProcessorDisplay() {
 
         rightContentPanel.removeAll();
 
-        for (PluginTrackManagerProcessor trackProcessor : trackPool.getTrackManagerProcessorList())
-        {
+        for (PluginTrackManagerProcessor trackProcessor : trackPool.getTrackManagerProcessorList()) {
             rightContentPanel.add(trackProcessor.getPanel());
         }
 
         rightContentPanel.revalidate();
 
-        ((JPanel) rightContentPanel.getParent()).revalidate();
+        rightContentPanel.getParent().revalidate();
     }
 
     JButton addTrackProcessorButton = new JButton("add Track Processor...");
@@ -184,14 +173,14 @@ public class TrackManager extends PluginActionable
      * void
      * {
      * String node = "plugins/fab/trackmanager/browser";
-     * 
+     *
      * Preferences preferences = Preferences.userRoot().node( node );
      * String path = preferences.get( "path" , "" );
      * chooser.setCurrentDirectory( new File(path) );
-     * 
+     *
      * int returnVal = chooser.showOpenDialog(null);
      * if(returnVal != JFileChooser.APPROVE_OPTION) return;
-     * 
+     *
      * preferences.put( "path", chooser.getCurrentDirectory().getAbsolutePath() );
      * }
      */
@@ -207,8 +196,7 @@ public class TrackManager extends PluginActionable
 
     JPanel mainPanel = GuiUtil.generatePanel();
 
-    IcyFrame mainFrame = GuiUtil.generateTitleFrame("TrackManager", mainPanel, new Dimension(400, 0), true, true, true,
-            true);
+    IcyFrame mainFrame = GuiUtil.generateTitleFrame("TrackManager", mainPanel, new Dimension(400, 0), true, true, true, true);
     JMenuBar menuBar = new JMenuBar();
 
     JPopupMenu pluginPopupMenu = new JPopupMenu("Add plugin to queue");
@@ -243,8 +231,7 @@ public class TrackManager extends PluginActionable
 
     JMenuItem onlineHelpMenuItem;
 
-    public TrackManager()
-    {
+    public TrackManager() {
 
         mainFrame.addFrameListener(this);
 
@@ -315,8 +302,7 @@ public class TrackManager extends PluginActionable
 
         trackingGroupSourceMenu = new JMenu("Tracking groups");
 
-        trackingGroupSourceHelpMenuItem = new JMenuItem(
-                "No track group available: use either file/load, a tracker or a benchmark generator to generate tracks.");
+        trackingGroupSourceHelpMenuItem = new JMenuItem("No track group available: use either file/load, a tracker or a benchmark generator to generate tracks.");
         trackingGroupSourceMenu.add(trackingGroupSourceHelpMenuItem);
         trackingGroupSourceHelpMenuItem.setEnabled(false);
 
@@ -388,8 +374,7 @@ public class TrackManager extends PluginActionable
         intermediatePanel.add(rightContentPanel, BorderLayout.NORTH);
         intermediatePanel.add(Box.createGlue(), BorderLayout.CENTER);
 
-        JScrollPane rightScrollPanel = new JScrollPane(intermediatePanel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-                JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+        JScrollPane rightScrollPanel = new JScrollPane(intermediatePanel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
         // JScrollPane rightScrollPanel = new JScrollPane(rightContentPanel,
         // JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
         // JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
@@ -434,20 +419,17 @@ public class TrackManager extends PluginActionable
     }
 
     /**
-     * Monitor swimming pool change event and change the track view. If a trackgroup is used in an
-     * other trackeditor, the trackgroup checkbox is disabled.
+     * Monitor swimming pool change event and change the track view. If a trackgroup is used in
+     * another trackeditor, the trackgroup checkbox is disabled.
      */
     @Override
-    public void swimmingPoolChangeEvent(SwimmingPoolEvent swimmingPoolEvent)
-    {
-        if (swimmingPoolEvent.getType() == SwimmingPoolEventType.ELEMENT_ADDED)
-        {
+    public void swimmingPoolChangeEvent(SwimmingPoolEvent swimmingPoolEvent) {
+        if (swimmingPoolEvent.getType() == SwimmingPoolEventType.ELEMENT_ADDED) {
             // System.out.println("TrackManager : swimming pool element added.");
             // System.out.println("object: " +
             // swimmingPoolEvent.getResult().getObject().getClass());
 
-            if (swimmingPoolEvent.getResult().getObject() instanceof TrackGroup)
-            {
+            if (swimmingPoolEvent.getResult().getObject() instanceof TrackGroup) {
                 CheckBoxResultSource checkBoxResultSource = new CheckBoxResultSource(swimmingPoolEvent.getResult(),
                         true);
                 trackingGroupSourceMenu.add(checkBoxResultSource);
@@ -455,26 +437,21 @@ public class TrackManager extends PluginActionable
                 trackingGroupSourceHelpMenuItem.setVisible(false);
             }
         }
-        if (swimmingPoolEvent.getType() == SwimmingPoolEventType.ELEMENT_REMOVED)
-        {
+        if (swimmingPoolEvent.getType() == SwimmingPoolEventType.ELEMENT_REMOVED) {
             trackPool.removeResult(swimmingPoolEvent.getResult());
             // resultList.remove( swimmingPoolEvent.getResult() );
 
             // If there is only one item to remove, no item will be left, then display help message.
-            if (trackingGroupSourceMenu.getItemCount() == 2)
-            {
+            if (trackingGroupSourceMenu.getItemCount() == 2) {
                 trackingGroupSourceHelpMenuItem.setVisible(true);
             }
 
-            for (int i = 0; i < trackingGroupSourceMenu.getItemCount(); i++)
-            {
+            for (int i = 0; i < trackingGroupSourceMenu.getItemCount(); i++) {
                 JMenuItem mi = trackingGroupSourceMenu.getItem(i);
-                if (mi instanceof CheckBoxResultSource)
-                {
+                if (mi instanceof CheckBoxResultSource) {
                     CheckBoxResultSource cbrs = (CheckBoxResultSource) mi;
 
-                    if (cbrs.result == swimmingPoolEvent.getResult())
-                    {
+                    if (cbrs.result == swimmingPoolEvent.getResult()) {
                         cbrs.destroy();
                         return;
                     }
@@ -502,8 +479,7 @@ public class TrackManager extends PluginActionable
 
     }
 
-    private void initTrackPoolInnerPanel()
-    {
+    private void initTrackPoolInnerPanel() {
 
         // trackingGroupSourceMenu.removeAll();
 
@@ -511,10 +487,8 @@ public class TrackManager extends PluginActionable
 
         ArrayList<SwimmingObject> swimmingPoolArrayList = Icy.getMainInterface().getSwimmingPool().getObjects();
 
-        for (SwimmingObject result : swimmingPoolArrayList)
-        {
-            if (result.getObject() instanceof TrackGroup)
-            {
+        for (SwimmingObject result : swimmingPoolArrayList) {
+            if (result.getObject() instanceof TrackGroup) {
                 boolean enabled = true;
                 // for (TrackManager trackEditor : trackManagerList)
                 // {
@@ -526,7 +500,7 @@ public class TrackManager extends PluginActionable
                 // }
 
                 CheckBoxResultSource checkBoxResultResource = new CheckBoxResultSource( // "" +
-                                                                                        // result.getObject().toString(),
+                        // result.getObject().toString(),
                         result, enabled);
 
                 trackingGroupSourceMenu.add(checkBoxResultResource);
@@ -542,15 +516,12 @@ public class TrackManager extends PluginActionable
 
     }
 
-    /**
-     * Called from other trackeditor to check wich results are already used.
-     * 
-     * @return
-     */
-    private ArrayList<SwimmingObject> getResultList()
-    {
-        return trackPool.resultList;
-    }
+//    /**
+//     * Called from other trackeditor to check witch results are already used.
+//     */
+//    private ArrayList<SwimmingObject> getResultList() {
+//        return trackPool.resultList;
+//    }
 
     // /**
     // * Called from other TrackEditor to avoid having the same track used
@@ -577,32 +548,32 @@ public class TrackManager extends PluginActionable
     // }
     // }
 
-    /** List of sequences which will be kept synchronize while the t cursor are moving. */
+    ///** List of sequences which will be kept synchronize while the t cursor are moving. */
     // private ArrayList<Sequence> sequenceToKeepSynchronizeInT = new ArrayList<Sequence>();
 
-    /** current time in track window */
+    /**
+     * current time in track window
+     */
     int currentT = 0;
 
-    public int getCurrentPositionT()
-    {
+    public int getCurrentPositionT() {
         return currentT;
     }
 
-    public void setCurrentPositionT(int t)
-    {
+    public void setCurrentPositionT(int t) {
         currentT = t;
         reSynchroTSequence();
         trackPool.fireTrackEditorProcessorChange();
     }
 
-    void timeCursorChanged(int t)
-    {
+    void timeCursorChanged(int t) {
         setCurrentPositionT(t);
     }
 
-    /** set the sequence with the current time set in trackEditor */
-    private void reSynchroTSequence()
-    {
+    /**
+     * set the sequence with the current time set in trackEditor
+     */
+    private void reSynchroTSequence() {
         // System.out.println("Synchro sequence");
         // for (Sequence sequence : sequenceToKeepSynchronizeInT)
         // {
@@ -611,10 +582,8 @@ public class TrackManager extends PluginActionable
         // }
 
         Sequence sequence = sequenceSelector.getSelectedSequence();
-        if (sequence != null)
-        {
-            for (Viewer viewer : Icy.getMainInterface().getViewers(sequence))
-            {
+        if (sequence != null) {
+            for (Viewer viewer : Icy.getMainInterface().getViewers(sequence)) {
                 viewer.setPositionT(currentT);
             }
             // sequence.setT( currentT );
@@ -622,18 +591,14 @@ public class TrackManager extends PluginActionable
 
     }
 
-    class CheckBoxResultSource extends JCheckBoxMenuItem implements ActionListener
-    {
-        private static final long serialVersionUID = -2021713434786505514L;
+    class CheckBoxResultSource extends JCheckBoxMenuItem implements ActionListener {
 
         // JCheckBox checkBox = new JCheckBox();
         // JToggleButton trackTimeOnSequenceButton = new JToggleButton("T");
         SwimmingObject result;
 
-        public CheckBoxResultSource(SwimmingObject result, boolean enabled)
-        {
-            if (!(result.getObject() instanceof TrackGroup))
-            {
+        public CheckBoxResultSource(SwimmingObject result, boolean enabled) {
+            if (!(result.getObject() instanceof TrackGroup)) {
                 System.out.println("Result object type not supported.");
                 return;
             }
@@ -641,7 +606,7 @@ public class TrackManager extends PluginActionable
             TrackGroup trackGroup = (TrackGroup) result.getObject();
             int nbTracks = trackGroup.getTrackSegmentList().size();
 
-            String label = "" + result.getObject().toString() + " (" + nbTracks + " Tracks)";
+            String label = result.getObject().toString() + " (" + nbTracks + " Tracks)";
 
             // trackTimeOnSequenceButton.setToolTipText("Keep Time synchro with sequence");
             // trackTimeOnSequenceButton.setSelected( true ) ;
@@ -684,8 +649,7 @@ public class TrackManager extends PluginActionable
         // checkBox.setSelected( b );
         // }
 
-        public void destroy()
-        {
+        public void destroy() {
             // remove the sequence tracked
             // if (trackTimeOnSequenceButton.isSelected())
             // {
@@ -698,8 +662,7 @@ public class TrackManager extends PluginActionable
         }
 
         @Override
-        public void actionPerformed(ActionEvent e)
-        {
+        public void actionPerformed(ActionEvent e) {
 
             // if (e.getSource() == trackTimeOnSequenceButton)
             // {
@@ -715,10 +678,8 @@ public class TrackManager extends PluginActionable
             // reSynchroTSequence();
             // }
 
-            if (e.getSource() == this)
-            {
-                if (this.isSelected())
-                {
+            if (e.getSource() == this) {
+                if (this.isSelected()) {
                     // resultList.add( result );
                     trackPool.addResult(result);
                     // trackPool.getDisplaySequence().painterChanged( null );
@@ -733,8 +694,7 @@ public class TrackManager extends PluginActionable
                     // }
 
                 }
-                else
-                {
+                else {
                     trackPool.removeResult(result);
                     // trackPool.getDisplaySequence().painterChanged( null );
                     // for (TrackManager trackEditor : trackManagerList)
@@ -764,8 +724,7 @@ public class TrackManager extends PluginActionable
 
     }
 
-    private void loadTracks()
-    {
+    private void loadTracks() {
         JFileChooser chooser = new JFileChooser();
         chooser.setDialogTitle("Select track.xml file.");
 
@@ -783,34 +742,28 @@ public class TrackManager extends PluginActionable
 
         preferences.put("path", chooser.getCurrentDirectory().getAbsolutePath());
 
-        try
-        {
+        try {
             final List<TrackGroup> groups = loadTracks(chooser.getSelectedFile().getAbsolutePath());
 
             // add group to swimming pool
-            for (TrackGroup group : groups)
-            {
+            for (TrackGroup group : groups) {
                 SwimmingObject so = new SwimmingObject(group);
                 Icy.getMainInterface().getSwimmingPool().add(so);
             }
 
             trackPool.fireTrackEditorProcessorChange();
         }
-        catch (IllegalArgumentException ex)
-        {
+        catch (IllegalArgumentException ex) {
             MessageDialog.showDialog(ex.getMessage(), MessageDialog.ERROR_MESSAGE);
-            return;
         }
     }
 
-    public static List<TrackGroup> loadTracks(String path) throws IllegalArgumentException
-    {
+    public static List<TrackGroup> loadTracks(String path) throws IllegalArgumentException {
         final Document document = XMLUtil.loadDocument(path, false);
         return loadTracks(document);
     }
 
-    public static List<TrackGroup> loadTracks(Document document) throws IllegalArgumentException
-    {
+    public static List<TrackGroup> loadTracks(Document document) throws IllegalArgumentException {
         if (document == null)
             throw new IllegalArgumentException("Invalid track file !");
 
@@ -821,14 +774,12 @@ public class TrackManager extends PluginActionable
 
         final List<TrackGroup> result = new ArrayList<>();
 
-        for (Element trackGroupElement : XMLUtil.getElements(rootElement, "trackgroup"))
-        {
+        for (Element trackGroupElement : XMLUtil.getElements(rootElement, "trackgroup")) {
             // create track group
             final TrackGroup trackGroup = new TrackGroup(null);
             trackGroup.setDescription(XMLUtil.getAttributeValue(trackGroupElement, "description", "no description"));
 
-            for (Element trackSegmentElement : XMLUtil.getElements(trackGroupElement))
-            {
+            for (Element trackSegmentElement : XMLUtil.getElements(trackGroupElement)) {
                 // create track segment
                 final TrackSegment trackSegment = new TrackSegment();
                 final int id = XMLUtil.getAttributeIntValue(trackSegmentElement, "id", -1);
@@ -838,8 +789,7 @@ public class TrackManager extends PluginActionable
                 else
                     trackSegment.setId(id);
 
-                for (Element detectionElement : XMLUtil.getElements(trackSegmentElement))
-                {
+                for (Element detectionElement : XMLUtil.getElements(trackSegmentElement)) {
                     // create detection
                     final Detection detection = Detection.createDetection(XMLUtil.getAttributeValue(detectionElement,
                             "classname", "plugins.nchenouard.spot.Detection"));
@@ -853,16 +803,14 @@ public class TrackManager extends PluginActionable
                 // add track segment to track group
                 trackGroup.addTrackSegment(trackSegment);
             }
-            
+
             // add track group to result
             result.add(trackGroup);
         }
 
         // get links
-        for (Element linkListElement : XMLUtil.getElements(rootElement, "linklist"))
-        {
-            for (Element link : XMLUtil.getElements(linkListElement))
-            {
+        for (Element linkListElement : XMLUtil.getElements(rootElement, "linklist")) {
+            for (Element link : XMLUtil.getElements(linkListElement)) {
                 final int idFrom = XMLUtil.getAttributeIntValue(link, "from", -1);
                 final int idTo = XMLUtil.getAttributeIntValue(link, "to", -1);
 
@@ -877,8 +825,7 @@ public class TrackManager extends PluginActionable
         return result;
     }
 
-    private void loadTracksFromTrackMate()
-    {
+    private void loadTracksFromTrackMate() {
         JFileChooser chooser = new JFileChooser();
         chooser.setDialogTitle("Import TrackMate xml track file.");
 
@@ -896,57 +843,48 @@ public class TrackManager extends PluginActionable
 
         preferences.put("path", chooser.getCurrentDirectory().getAbsolutePath());
 
-        try
-        {
+        try {
             final List<TrackGroup> groups = loadTracksFromTrackMate(chooser.getSelectedFile().getAbsolutePath());
 
             // add group to swimming pool
-            for (TrackGroup group : groups)
-            {
+            for (TrackGroup group : groups) {
                 SwimmingObject so = new SwimmingObject(group);
                 Icy.getMainInterface().getSwimmingPool().add(so);
             }
 
             trackPool.fireTrackEditorProcessorChange();
         }
-        catch (IllegalArgumentException ex)
-        {
+        catch (IllegalArgumentException ex) {
             MessageDialog.showDialog(ex.getMessage(), MessageDialog.ERROR_MESSAGE);
-            return;
         }
     }
 
-    public static List<TrackGroup> loadTracksFromTrackMate(String path)
-    {
+    public static List<TrackGroup> loadTracksFromTrackMate(String path) {
         final Document document = XMLUtil.loadDocument(path, false);
         return loadTracksFromTrackMate(document);
     }
 
-    public static List<TrackGroup> loadTracksFromTrackMate(Document document) throws IllegalArgumentException
-    {
+    public static List<TrackGroup> loadTracksFromTrackMate(Document document) throws IllegalArgumentException {
         if (document == null)
             throw new IllegalArgumentException("Invalid track file !");
 
         final Element trackNode = XMLUtil.getElement(document.getDocumentElement().getParentNode(), "Tracks");
         if (trackNode == null)
-            throw new IllegalArgumentException(
-                    "Unsupported version of TrackMate XML file !\nTry to use the Icy XML export in TrackMate instead and directly load it with 'TrackManager-->File->Load...' command.");
+            throw new IllegalArgumentException("Unsupported version of TrackMate XML file !\nTry to use the Icy XML export in TrackMate instead and directly load it with 'TrackManager-->File->Load...' command.");
 
         final List<TrackGroup> result = new ArrayList<>();
-        final String unit = XMLUtil.getAttributeValue(trackNode, "spaceUnits", "pixel");
+        //final String unit = XMLUtil.getAttributeValue(trackNode, "spaceUnits", "pixel");
 
-        double unitMultiplicator = 1;
-        if (unit == "micron")
-            unitMultiplicator = 0.000001d;
+        //double unitMultiplicator = 1;
+        //if (unit.equals("micron"))
+        //    unitMultiplicator = 0.000001d;
 
-        for (Element trackElement : XMLUtil.getElements(document.getDocumentElement().getParentNode(), "Tracks"))
-        {
+        for (Element trackElement : XMLUtil.getElements(document.getDocumentElement().getParentNode(), "Tracks")) {
             // create track group
             final TrackGroup trackGroup = new TrackGroup(null);
             trackGroup.setDescription(XMLUtil.getAttributeValue(trackElement, "description", "no description"));
 
-            for (Element trackSegmentElement : XMLUtil.getElements(trackElement))
-            {
+            for (Element trackSegmentElement : XMLUtil.getElements(trackElement)) {
                 // create track segment
                 final TrackSegment trackSegment = new TrackSegment();
 
@@ -956,8 +894,7 @@ public class TrackManager extends PluginActionable
                 else
                     trackSegment.setId(id);
 
-                for (Element detectionElement : XMLUtil.getElements(trackSegmentElement))
-                {
+                for (Element detectionElement : XMLUtil.getElements(trackSegmentElement)) {
                     // create detection
                     final Detection detection = Detection.createDetection("plugins.nchenouard.spot.Detection");
 
@@ -970,7 +907,7 @@ public class TrackManager extends PluginActionable
                 // add track segment to group
                 trackGroup.addTrackSegment(trackSegment);
             }
-            
+
             // add track group to result
             result.add(trackGroup);
         }
@@ -978,8 +915,7 @@ public class TrackManager extends PluginActionable
         return result;
     }
 
-    private void debug()
-    {
+    private void debug() {
 
         System.out.println("--- debug");
         // for ( Link link : trackPool.getLinks() )
@@ -993,8 +929,7 @@ public class TrackManager extends PluginActionable
 
     }
 
-    private void saveTracks()
-    {
+    private void saveTracks() {
         JFileChooser chooser = new JFileChooser();
         chooser.setDialogTitle("Select track.xml file.");
         chooser.setFileFilter(new FileNameExtensionFilter("XML track file", "xml"));
@@ -1014,8 +949,7 @@ public class TrackManager extends PluginActionable
         saveTracks(chooser.getSelectedFile().getAbsolutePath(), trackPool.getTrackGroupList());
     }
 
-    public static void saveTracks(String path, List<TrackGroup> groups)
-    {
+    public static void saveTracks(String path, List<TrackGroup> groups) {
         // get file
         final File file = new File(FileUtil.setExtension(path, ".xml"));
         // generate document
@@ -1024,26 +958,22 @@ public class TrackManager extends PluginActionable
         XMLUtil.saveDocument(document, file);
     }
 
-    public static Document saveTracks(List<TrackGroup> groups)
-    {
+    public static Document saveTracks(List<TrackGroup> groups) {
         final Document result = XMLUtil.createDocument(true);
         final Element rootElement = result.getDocumentElement();
 
         final Element versionElement = XMLUtil.addElement(rootElement, "trackfile");
         versionElement.setAttribute("version", "1");
 
-        for (TrackGroup trackGroup : groups)
-        {
+        for (TrackGroup trackGroup : groups) {
             final Element trackGroupElement = XMLUtil.addElement(rootElement, "trackgroup");
             trackGroupElement.setAttribute("description", trackGroup.getDescription());
 
-            for (TrackSegment trackSegment : trackGroup.getTrackSegmentList())
-            {
+            for (TrackSegment trackSegment : trackGroup.getTrackSegmentList()) {
                 final Element trackElement = XMLUtil.addElement(trackGroupElement, "track");
-                trackElement.setAttribute("id", "" + trackSegment.getId());
+                trackElement.setAttribute("id", String.valueOf(trackSegment.getId()));
 
-                for (Detection detection : trackSegment.getDetectionList())
-                {
+                for (Detection detection : trackSegment.getDetectionList()) {
                     final Element detectionElement = XMLUtil.addElement(trackElement, "detection");
 
                     detectionElement.setAttribute("classname", detection.getClass().getName());
@@ -1058,12 +988,11 @@ public class TrackManager extends PluginActionable
 
         // save links
         final Element linklistElement = XMLUtil.addElement(rootElement, "linklist");
-        for (Link link : TrackPool.getLinks(groups))
-        {
+        for (Link link : TrackPool.getLinks(groups)) {
             final Element trackElement = XMLUtil.addElement(linklistElement, "link");
 
-            trackElement.setAttribute("from", "" + link.getStartSegment().getId());
-            trackElement.setAttribute("to", "" + link.getEndSegment().getId());
+            trackElement.setAttribute("from", String.valueOf(link.getStartSegment().getId()));
+            trackElement.setAttribute("to", String.valueOf(link.getEndSegment().getId()));
         }
 
         return result;
@@ -1072,23 +1001,19 @@ public class TrackManager extends PluginActionable
     /**
      * Attempt to re-classify / re-organize the track order to improve track understandment.
      */
-    public void reOrganize()
-    {
-        for (TrackGroup trackGroup : trackPool.getTrackGroupList())
-        {
+    public void reOrganize() {
+        for (TrackGroup trackGroup : trackPool.getTrackGroupList()) {
+            @SuppressWarnings("unchecked")
             List<TrackSegment> trackSegmentList = (ArrayList<TrackSegment>) trackGroup.getTrackSegmentList().clone();
-            List<TrackSegment> trackSegmentListOrganized = (ArrayList<TrackSegment>) trackGroup.getTrackSegmentList()
-                    .clone();
+            @SuppressWarnings("unchecked")
+            List<TrackSegment> trackSegmentListOrganized = (ArrayList<TrackSegment>) trackGroup.getTrackSegmentList().clone();
 
             int tMax = trackPool.getLastDetectionTimePoint();
 
             for (int t = 0; t < tMax; t++)
-                for (TrackSegment ts : trackSegmentList)
-                {
-                    if (ts.getFirstDetection().getT() == t)
-                    {
-                        for (int index = 0; index < ts.nextList.size(); index++)
-                        {
+                for (TrackSegment ts : trackSegmentList) {
+                    if (ts.getFirstDetection().getT() == t) {
+                        for (int index = 0; index < ts.nextList.size(); index++) {
                             TrackSegment ts2 = ts.nextList.get(index);
                             trackSegmentListOrganized.remove(ts2);
                             int targetIndex = trackSegmentListOrganized.indexOf(ts) - ts.nextList.size() / 2 + index
@@ -1111,40 +1036,32 @@ public class TrackManager extends PluginActionable
     }
 
     @Override
-    public void actionPerformed(ActionEvent e)
-    {
-        if (e.getSource() == onlineHelpMenuItem)
-        {
-            NetworkUtil.openBrowser("http://icy.bioimageanalysis.org/index.php?display=detailPlugin&pluginId=88");
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == onlineHelpMenuItem) {
+            NetworkUtil.openBrowser("https://icy.bioimageanalysis.org/plugin/track-manager/");
         }
 
-        if (e.getSource() == loadMenuItem)
-        {
+        if (e.getSource() == loadMenuItem) {
             loadTracks();
         }
 
-        if (e.getSource() == loadFromTrackMateMenuItem)
-        {
+        if (e.getSource() == loadFromTrackMateMenuItem) {
             loadTracksFromTrackMate();
         }
 
-        if (e.getSource() == saveMenuItem)
-        {
+        if (e.getSource() == saveMenuItem) {
             saveTracks();
         }
 
-        if (e.getSource() == sequenceSelector)
-        {
+        if (e.getSource() == sequenceSelector) {
             trackPool.setDisplaySequence(sequenceSelector.getSelectedSequence());
         }
 
-        if (e.getSource() == reOrganizeMenuItem)
-        {
+        if (e.getSource() == reOrganizeMenuItem) {
             reOrganize();
         }
 
-        if (e.getSource() == displayTrackPanelCheckBoxMenuItem)
-        {
+        if (e.getSource() == displayTrackPanelCheckBoxMenuItem) {
             trackPanel.setEnableLeftPanelTrackDisplay(displayTrackPanelCheckBoxMenuItem.isSelected());
 
             String node = "plugins/fab/trackmanager/displaytrackpanel";
@@ -1159,41 +1076,33 @@ public class TrackManager extends PluginActionable
             // trackPool.fireTrackEditorProcessorChange();
         }
 
-        if (e.getSource() == externaliseCheckBoxMenuItem)
-        {
-            if (externaliseCheckBoxMenuItem.isSelected())
-            {
+        if (e.getSource() == externaliseCheckBoxMenuItem) {
+            if (externaliseCheckBoxMenuItem.isSelected()) {
                 mainFrame.externalize();
             }
-            else
-            {
+            else {
                 mainFrame.internalize();
             }
         }
 
-        if (e.getSource() == addTrackProcessorButton)
-        {
+        if (e.getSource() == addTrackProcessorButton) {
             pluginPopupMenu.show(addTrackProcessorButton, 0, 0);
         }
 
-        if (e.getSource() == showHideTrackPoolSourcesPanel)
-        {
+        if (e.getSource() == showHideTrackPoolSourcesPanel) {
             trackGroupSourceInnerPanel.setVisible(showHideTrackPoolSourcesPanel.isSelected());
         }
 
-        if (e.getSource() == selectAllMenuItem)
-        {
+        if (e.getSource() == selectAllMenuItem) {
             trackPool.selectAllTracks();
         }
 
-        if (e.getSource() == unselectAllMenuItem)
-        {
+        if (e.getSource() == unselectAllMenuItem) {
             trackPool.unselectAllTracks();
         }
 
-        if (e.getSource() == selectTrackByLengthMenuItem)
-        {
-            TrackLengthDialog tld = new TrackLengthDialog(trackPool);
+        //if (e.getSource() == selectTrackByLengthMenuItem) {
+            //TrackLengthDialog tld = new TrackLengthDialog(trackPool);
 
             // TrackLengthDialog tld = new TrackLengthDialog();
             // JDialog dialog = new JDialog();
@@ -1207,43 +1116,36 @@ public class TrackManager extends PluginActionable
             // dialog.setSize(200, 100);
             // dialog.setLocationRelativeTo(null);
             // dialog.setVisible(true);
-        }
+        //}
 
-        if (e.getSource() == invertSelectionMenuItem)
-        {
+        if (e.getSource() == invertSelectionMenuItem) {
             trackPool.invertSelection();
         }
 
-        if (e.getSource() == deleteLinkMenuItem)
-        {
+        if (e.getSource() == deleteLinkMenuItem) {
             trackPool.deleteSelectedLink();
         }
 
-        if (e.getSource() == deleteSelectionMenuItem)
-        {
+        if (e.getSource() == deleteSelectionMenuItem) {
             trackPool.deleteSelectedTracks();
         }
 
-        if (e.getSource() == debugMenuItem)
-        {
+        if (e.getSource() == debugMenuItem) {
             debug();
         }
 
-        if (e.getSource() == fuseTracksMenuItem)
-        {
+        if (e.getSource() == fuseTracksMenuItem) {
             trackPool.fuseAllTracks();
         }
 
-        if (e.getSource() == zoomLessButton)
-        {
+        if (e.getSource() == zoomLessButton) {
             int newX = (int) trackPanel.getDetectDim().getWidth() - 5;
             if (newX <= 0)
                 newX = 5;
             trackPanel.setDetectDim(new Dimension(newX, newX));
             trackPool.fireTrackEditorProcessorChange();
         }
-        if (e.getSource() == zoomMoreButton)
-        {
+        if (e.getSource() == zoomMoreButton) {
             trackPanel.setDetectDim(new Dimension((int) trackPanel.getDetectDim().getWidth() + 5,
                     (int) trackPanel.getDetectDim().getHeight() + 5));
             trackPool.fireTrackEditorProcessorChange();
@@ -1267,13 +1169,11 @@ public class TrackManager extends PluginActionable
     }
 
     @Override
-    public void adjustmentValueChanged(AdjustmentEvent arg0)
-    {
+    public void adjustmentValueChanged(AdjustmentEvent arg0) {
 
     }
 
-    private void buildPluginMenu()
-    {
+    private void buildPluginMenu() {
 
         pluginPopupMenu.removeAll();
 
@@ -1284,11 +1184,9 @@ public class TrackManager extends PluginActionable
             pluginPopupMenu.addSeparator();
         }
 
-        for (PluginDescriptor plugin : PluginLoader.getPlugins())
-        {
+        for (PluginDescriptor plugin : PluginLoader.getPlugins()) {
             if (plugin.isInstanceOf(PluginTrackManagerProcessor.class))
-                if (!plugin.isAbstract())
-                {
+                if (!plugin.isAbstract()) {
                     JMenuItem menuItem = new JMenuItem(plugin.getName(), ResourceUtil.scaleIcon(plugin.getIcon(), 24));
 
                     pluginPopupMenu.add(menuItem);
@@ -1300,8 +1198,7 @@ public class TrackManager extends PluginActionable
 
     }
 
-    public void moveTrackProcessor(PluginTrackManagerProcessor trackEditorProcessor, int i)
-    {
+    public void moveTrackProcessor(PluginTrackManagerProcessor trackEditorProcessor, int i) {
         int newIndex = trackPool.getTrackManagerProcessorList().indexOf(trackEditorProcessor);
         // System.out.println("previous index: " + newIndex );
         newIndex += i;
@@ -1324,14 +1221,12 @@ public class TrackManager extends PluginActionable
     }
 
     @Override
-    public void icyFrameActivated(IcyFrameEvent e)
-    {
+    public void icyFrameActivated(IcyFrameEvent e) {
 
     }
 
     @Override
-    public void icyFrameClosed(IcyFrameEvent e)
-    {
+    public void icyFrameClosed(IcyFrameEvent e) {
         // release T synchro with sequences.
         // sequenceToKeepSynchronizeInT.clear();
 
@@ -1349,10 +1244,9 @@ public class TrackManager extends PluginActionable
 
         // close all track processors.
 
-        ArrayList<PluginTrackManagerProcessor> processorList = (ArrayList<PluginTrackManagerProcessor>) trackPool
-                .getTrackManagerProcessorList().clone();
-        for (PluginTrackManagerProcessor tep : processorList)
-        {
+        @SuppressWarnings("unchecked")
+        ArrayList<PluginTrackManagerProcessor> processorList = (ArrayList<PluginTrackManagerProcessor>) trackPool.getTrackManagerProcessorList().clone();
+        for (PluginTrackManagerProcessor tep : processorList) {
             tep.Close();
         }
 
@@ -1368,58 +1262,39 @@ public class TrackManager extends PluginActionable
     }
 
     @Override
-    public void icyFrameClosing(IcyFrameEvent e)
-    {
+    public void icyFrameClosing(IcyFrameEvent e) {
 
     }
 
     @Override
-    public void icyFrameDeactivated(IcyFrameEvent e)
-    {
+    public void icyFrameDeactivated(IcyFrameEvent e) {
 
     }
 
     @Override
-    public void icyFrameDeiconified(IcyFrameEvent e)
-    {
+    public void icyFrameDeiconified(IcyFrameEvent e) {
 
     }
 
     @Override
-    public void icyFrameIconified(IcyFrameEvent e)
-    {
+    public void icyFrameIconified(IcyFrameEvent e) {
 
     }
 
     @Override
-    public void icyFrameOpened(IcyFrameEvent e)
-    {
+    public void icyFrameOpened(IcyFrameEvent e) {
 
     }
 
     @Override
-    public void icyFrameExternalized(IcyFrameEvent e)
-    {
+    public void icyFrameExternalized(IcyFrameEvent e) {
 
     }
 
     @Override
-    public void icyFrameInternalized(IcyFrameEvent e)
-    {
+    public void icyFrameInternalized(IcyFrameEvent e) {
 
     }
-
-    @Override
-    public void compute()
-    {
-        // TODO Auto-generated method stub
-
-    }
-    //
-    // public void unSelectAllTrackGroup() {
-    // // TODO Auto-generated method stub
-    //
-    // }
 
     // public void setDisplaySequence(Sequence sequence) {
     //
@@ -1427,21 +1302,17 @@ public class TrackManager extends PluginActionable
     //
     // }
 
-    public Sequence getDisplaySequence()
-    {
+    public Sequence getDisplaySequence() {
         return sequenceSelector.getSelectedSequence();
     }
 
-    public void setDisplaySequence(Sequence sequence)
-    {
+    public void setDisplaySequence(Sequence sequence) {
         sequenceSelector.setSelectedSequence(sequence);
 
     }
 
     @Override
-    public void run()
-    {
+    public void run() {
 
     }
-
 }

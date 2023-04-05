@@ -1,20 +1,20 @@
 /*
- * Copyright 2010, 2011 Institut Pasteur.
- * 
+ * Copyright 2010-2023 Institut Pasteur.
+ *
  * This file is part of ICY.
- * 
+ *
  * ICY is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * ICY is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with ICY. If not, see <http://www.gnu.org/licenses/>.
+ * along with ICY. If not, see <https://www.gnu.org/licenses/>.
  */
 package plugins.fab.trackmanager;
 
@@ -34,19 +34,14 @@ import plugins.nchenouard.spot.Detection;
 
 /**
  * Display a single detection of a track. Used by TrackPanel / TrackEditor
- * 
+ *
  * @author fab
- * @deprecated not anymore a panel or an objet to speed up the rendering process.
  */
-public class TrackDetection extends JPanel
-{
-
-    private static final long serialVersionUID = 7254806428248130683L;
+public class TrackDetection extends JPanel {
     private boolean Selected = false;
-    private Detection detection;
+    private final Detection detection;
 
-    public TrackDetection(Detection detection)
-    {
+    public TrackDetection(Detection detection) {
         super();
         this.detection = detection;
         // if ( detection.getDetectionType() == Detection.DETECTIONTYPE_REAL_DETECTION ) color =
@@ -56,25 +51,21 @@ public class TrackDetection extends JPanel
 
     }
 
-    public Detection getDetection()
-    {
+    public Detection getDetection() {
         return detection;
     }
 
-    public void setSelected(boolean Selected)
-    {
+    public void setSelected(boolean Selected) {
         this.Selected = Selected;
         this.updateUI();
     }
 
-    public boolean isSelected(boolean Selected)
-    {
+    public boolean isSelected(boolean Selected) {
         return Selected;
     }
 
     @Override
-    protected void paintComponent(Graphics g)
-    {
+    protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
 
@@ -90,29 +81,30 @@ public class TrackDetection extends JPanel
         // Draw plot
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2.setColor(Color.black);
-        Shape shape = new Rectangle2D.Float(getWidth() / 3f, getHeight() / 3f, getWidth() - 2 * getWidth() / 3f,
-                getHeight() - 2 * getHeight() / 3f);
+        Shape shape = new Rectangle2D.Float(
+                getWidth() / 3f,
+                getHeight() / 3f,
+                getWidth() - 2 * getWidth() / 3f,
+                getHeight() - 2 * getHeight() / 3f
+        );
         g2.fill(shape);
 
         // Draw red square if selected for drag and drop
 
-        if (Selected)
-        {
+        if (Selected) {
             g2.setColor(Color.red);
             g2.drawRect(1, 1, getWidth() - 3, getHeight() - 3);
         }
 
         // Draw square if depending detection is selected.
 
-        if (detection.isSelected())
-        {
+        if (detection.isSelected()) {
             g2.setStroke(new BasicStroke(4));
             g2.setColor(Color.black);
             g2.drawRect(0, 0, getWidth(), getHeight());
             g2.setStroke(new BasicStroke(1));
         }
-        if (detection.getDetectionType() == Detection.DETECTIONTYPE_VIRTUAL_DETECTION)
-        {
+        if (detection.getDetectionType() == Detection.DETECTIONTYPE_VIRTUAL_DETECTION) {
             g2.setStroke(new BasicStroke(2));
             g2.setColor(Color.white);
             g2.drawLine(0, 0, getWidth(), getHeight());

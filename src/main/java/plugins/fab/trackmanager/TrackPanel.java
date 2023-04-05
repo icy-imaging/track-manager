@@ -1,20 +1,20 @@
 /*
- * Copyright 2010, 2011 Institut Pasteur.
- * 
+ * Copyright 2010-2023 Institut Pasteur.
+ *
  * This file is part of ICY.
- * 
+ *
  * ICY is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * ICY is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with ICY. If not, see <http://www.gnu.org/licenses/>.
+ * along with ICY. If not, see <https://www.gnu.org/licenses/>.
  */
 package plugins.fab.trackmanager;
 
@@ -46,6 +46,7 @@ import icy.gui.viewer.Viewer;
 import icy.gui.viewer.ViewerEvent;
 import icy.gui.viewer.ViewerListener;
 import icy.main.Icy;
+import icy.painter.Overlay;
 import icy.sequence.DimensionId;
 import icy.sequence.Sequence;
 import icy.system.thread.ThreadUtil;
@@ -53,27 +54,22 @@ import plugins.nchenouard.spot.Detection;
 
 /**
  * Panel managing Tracks and users interactions.
- * 
+ *
  * @author Fabrice de Chaumont
  */
 public class TrackPanel extends JPanel implements MouseListener, MouseMotionListener, TrackPainterListener,
-        TrackManagerProcessorListener, ViewerListener, GlobalSequenceListener, GlobalViewerListener, Runnable
-{
-
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 938480382468773601L;
+        TrackManagerProcessorListener, ViewerListener, GlobalSequenceListener, GlobalViewerListener, Runnable {
 
     TimeCursor timeCursor = new TimeCursor();
 
-    /** Dimension of a single detection */
+    /**
+     * Dimension of a single detection
+     */
     private Dimension detectDim = new Dimension(10, 10);
 
     private TrackPool trackPool;
 
-    public TrackPanel(TrackPool trackPool, boolean enableLeftPanelTrackDisplay)
-    {
+    public TrackPanel(TrackPool trackPool, boolean enableLeftPanelTrackDisplay) {
 
         super();
         this.enableLeftPanelTrackDisplay = enableLeftPanelTrackDisplay;
@@ -90,16 +86,14 @@ public class TrackPanel extends JPanel implements MouseListener, MouseMotionList
         Icy.getMainInterface().addGlobalSequenceListener(this);
         Icy.getMainInterface().addGlobalViewerListener(this);
 
-        // System.out.println("TEST tackpanel");
+        // System.out.println("TEST trackpanel");
 
     }
 
-    void setupViewerListener()
-    {
+    void setupViewerListener() {
         // remove all listener
 
-        for (Viewer viewer : Icy.getMainInterface().getViewers())
-        {
+        for (Viewer viewer : Icy.getMainInterface().getViewers()) {
             viewer.removeListener(this);
         }
 
@@ -109,27 +103,23 @@ public class TrackPanel extends JPanel implements MouseListener, MouseMotionList
         if (sequence == null)
             return;
 
-        for (Viewer viewer : Icy.getMainInterface().getViewers(sequence))
-        {
+        for (Viewer viewer : Icy.getMainInterface().getViewers(sequence)) {
             viewer.addListener(this);
         }
     }
 
-    public void mouseClicked(MouseEvent e)
-    {
+    public void mouseClicked(MouseEvent e) {
         if (!enableLeftPanelTrackDisplay)
             return;
 
         MouseLink.clear();
 
         // Watch if a detection exists for selection.
-        {
-            TrackSegment ts = getTrackSegmentAt(e.getY());
-            if (ts == null)
-                return;
-            ts.setAllDetectionSelected(!ts.isAllDetectionSelected());
-            redrawDetection3();
-        }
+        TrackSegment ts = getTrackSegmentAt(e.getY());
+        if (ts == null)
+            return;
+        ts.setAllDetectionSelected(!ts.isAllDetectionSelected());
+        redrawDetection3();
 
         // Feature: add the detection panel
 
@@ -146,8 +136,7 @@ public class TrackPanel extends JPanel implements MouseListener, MouseMotionList
 
     }
 
-    private TrackSegment getTrackSegmentAt(int y)
-    {
+    private TrackSegment getTrackSegmentAt(int y) {
 
         TrackSegment tsResult = null;
 
@@ -155,11 +144,10 @@ public class TrackPanel extends JPanel implements MouseListener, MouseMotionList
 
         int currentLine = 0;
 
-        loop: for (TrackGroup trackGroup : trackPool.getTrackGroupList())
-            for (TrackSegment ts : trackGroup.getTrackSegmentList())
-            {
-                if (currentLine == y)
-                {
+        loop:
+        for (TrackGroup trackGroup : trackPool.getTrackGroupList())
+            for (TrackSegment ts : trackGroup.getTrackSegmentList()) {
+                if (currentLine == y) {
                     tsResult = ts;
                     break loop;
                 }
@@ -169,10 +157,7 @@ public class TrackPanel extends JPanel implements MouseListener, MouseMotionList
         return tsResult;
     }
 
-    private Detection getDetectionAt(int x, int y)
-    {
-        Detection detection = null;
-
+    private Detection getDetectionAt(int x, int y) {
         TrackSegment ts = getTrackSegmentAt(y);
 
         if (ts == null)
@@ -180,37 +165,32 @@ public class TrackPanel extends JPanel implements MouseListener, MouseMotionList
 
         int t = x / getDetectDim().width;
 
-        detection = ts.getDetectionAtTime(t);
-
-        return detection;
+        return ts.getDetectionAtTime(t);
     }
 
-    public void mouseEntered(MouseEvent e)
-    {
+    public void mouseEntered(MouseEvent e) {
 
     }
 
-    public void mouseExited(MouseEvent e)
-    {
+    public void mouseExited(MouseEvent e) {
 
     }
 
-    public void mousePressed(MouseEvent e)
-    {
+    public void mousePressed(MouseEvent e) {
         if (!enableLeftPanelTrackDisplay)
             return;
 
         MouseLink.clear();
 
-        MouseLink.xstart = e.getX();
-        MouseLink.ystart = e.getY();
+        MouseLink.xStart = e.getX();
+        MouseLink.yStart = e.getY();
 
-        MouseLink.xend = e.getX();
-        MouseLink.yend = e.getY();
+        MouseLink.xEnd = e.getX();
+        MouseLink.yEnd = e.getY();
 
         // System.out.println( "debug info: mouse pressed.");
 
-        Component component = getComponentAt(MouseLink.xstart, MouseLink.ystart);
+        Component component = getComponentAt(MouseLink.xStart, MouseLink.yStart);
 
         // System.out.println("Mouse pressed component: " + component );
 
@@ -233,33 +213,27 @@ public class TrackPanel extends JPanel implements MouseListener, MouseMotionList
 
         // System.out.println( "detection at click : " + detection );
 
-        if (detection != null)
-        {
-            MouseLink.xstart = e.getX();
-            MouseLink.ystart = e.getY();
+        if (detection != null) {
+            MouseLink.xStart = e.getX();
+            MouseLink.yStart = e.getY();
             MouseLink.detectionStart = detection;
-            MouseLink.ispressed = true;
+            MouseLink.isPressed = true;
             // System.out.println("Debug detection mouse link start : " + detection );
         }
 
         // System.out.println("debug Track selected : " + track );
 
         // manage track and time drag. Time has priority.
-        if (component == this)
-        {
-            if (timeCursor.contains(e.getX(), e.getY()))
-            {
+        if (component == this) {
+            if (timeCursor.contains(e.getX(), e.getY())) {
                 // enables time drag.
                 timeCursor.dragging = true;
             }
-            else
-            {
+            else {
                 // look if at least one track exists.
                 boolean oneAtLeast = false;
-                for (TrackGroup trackGroup : trackPool.getTrackGroupList())
-                {
-                    if (trackGroup.getTrackSegmentList().size() != 0)
-                    {
+                for (TrackGroup trackGroup : trackPool.getTrackGroupList()) {
+                    if (trackGroup.getTrackSegmentList().size() != 0) {
                         oneAtLeast = true;
                         break;
                     }
@@ -267,8 +241,7 @@ public class TrackPanel extends JPanel implements MouseListener, MouseMotionList
 
                 // enables trackDrag.
                 // if ( trackPool.getTrackSegmentList().size() != 0 )
-                if (oneAtLeast)
-                {
+                if (oneAtLeast) {
                     TrackDrag.dragging = true;
                     TrackDrag.ts = getCurrentTrackSegmentWithY(e.getY());
                     repaint();
@@ -278,14 +251,14 @@ public class TrackPanel extends JPanel implements MouseListener, MouseMotionList
 
     }
 
-    /** Manage time cursor. */
-    private class TimeCursor
-    {
+    /**
+     * Manage time cursor.
+     */
+    private class TimeCursor {
         int currentT = 0;
         boolean dragging = false;
 
-        boolean contains(int x, int y)
-        {
+        boolean contains(int x, int y) {
             Rectangle r = new Rectangle(currentT * (int) detectDim.getWidth(), 0, (int) detectDim.getWidth(),
                     Integer.MAX_VALUE);
             return r.contains(x, y);
@@ -295,20 +268,16 @@ public class TrackPanel extends JPanel implements MouseListener, MouseMotionList
     /**
      * Returns the track at Y //FIXME !
      */
-    private TrackSegment getCurrentTrackSegmentWithY(int Y)
-    {
+    private TrackSegment getCurrentTrackSegmentWithY(int Y) {
         // System.out.println("drag a refaire.");
         // return null;
-        TrackSegment ts = null;
-        ts = trackPool.getTrackSegmentList().get(getCurrentTrackSegmentIndexWithY(Y));
-        return ts;
+        return trackPool.getTrackSegmentList().get(getCurrentTrackSegmentIndexWithY(Y));
     }
 
     /**
      * Returns the number of the track with Y //FIXME !
      */
-    private int getCurrentTrackSegmentIndexWithY(int Y)
-    {
+    private int getCurrentTrackSegmentIndexWithY(int Y) {
         // System.out.println("drag a refaire.");
         // return 0;
         int index = (int) (Y / detectDim.getHeight());
@@ -319,31 +288,29 @@ public class TrackPanel extends JPanel implements MouseListener, MouseMotionList
         return index;
     }
 
-    /** class use to record Track Drag states. */
-    private static class TrackDrag
-    {
+    /**
+     * class use to record Track Drag states.
+     */
+    private static class TrackDrag {
 
         static boolean dragging = false;
         static TrackSegment ts = null;
     }
 
-    public void mouseReleased(MouseEvent e)
-    {
-        MouseLink.xend = e.getX();
-        MouseLink.yend = e.getY();
+    public void mouseReleased(MouseEvent e) {
+        MouseLink.xEnd = e.getX();
+        MouseLink.yEnd = e.getY();
 
         // System.out.println("mouse released");
 
-        if (MouseLink.ispressed)
-        {
+        if (MouseLink.isPressed) {
 
             // System.out.println("Mouse link is pressed");
 
             Detection detection = getDetectionAt(e.getX(), e.getY());
-            if (detection != null)
-            {
-                MouseLink.xend = e.getX();
-                MouseLink.yend = e.getY();
+            if (detection != null) {
+                MouseLink.xEnd = e.getX();
+                MouseLink.yEnd = e.getY();
                 MouseLink.detectionEnd = detection;
                 // System.out.println("Debug detection mouse link end : " + detection );
             }
@@ -374,26 +341,22 @@ public class TrackPanel extends JPanel implements MouseListener, MouseMotionList
         }
         MouseLink.clear();
 
-        if (TrackDrag.dragging)
-        {
+        if (TrackDrag.dragging) {
             TrackDrag.dragging = false;
             repaint();
         }
 
-        if (timeCursor.dragging)
-        {
+        if (timeCursor.dragging) {
             timeCursor.dragging = false;
             repaint();
         }
 
     }
 
-    public void mouseDragged(MouseEvent e)
-    {
-        if (MouseLink.ispressed)
-        {
-            MouseLink.xend = e.getX();
-            MouseLink.yend = e.getY();
+    public void mouseDragged(MouseEvent e) {
+        if (MouseLink.isPressed) {
+            MouseLink.xEnd = e.getX();
+            MouseLink.yEnd = e.getY();
 
             // Component component = getComponentAt(MouseLink.xend, MouseLink.yend);
             //
@@ -427,21 +390,19 @@ public class TrackPanel extends JPanel implements MouseListener, MouseMotionList
         }
 
         // if track dragging , moves track.
-        if (TrackDrag.dragging)
-        {
+        if (TrackDrag.dragging) {
             trackPool.moveTrackToIndex(TrackDrag.ts, getCurrentTrackSegmentIndexWithY(e.getY()));
             clearDetectionsAndReDisplay();
         }
 
         // if time dragging , moves times.
-        if (timeCursor.dragging)
-        {
+        if (timeCursor.dragging) {
             timeCursor.currentT = (int) (e.getX() / detectDim.getWidth());
 
             // System.out.println( TimeCursor.currentT );
             // System.out.println( "track editor : " + trackPool.getTrackEditor() );
 
-            // FIXME : remettre ces securites.
+            // FIXME : remettre ces sécurités.
             if (timeCursor.currentT < 0)
                 timeCursor.currentT = 0;
             // if ( TimeCursor.currentT > trackPool.getSequence().getLength() -1 )
@@ -452,24 +413,24 @@ public class TrackPanel extends JPanel implements MouseListener, MouseMotionList
         }
     }
 
-    public void mouseMoved(MouseEvent e)
-    {
+    public void mouseMoved(MouseEvent e) {
 
     }
+
     /*
      * @Override
      * protected void paintComponent(Graphics g)
      * {
      * super.paintComponent(g);
-     * 
+     *
      * Graphics2D g2 = (Graphics2D) g;
-     * 
+     *
      * // affichage des fond de tracks.
      * // boolean swapcolor = false;
      * // Color c1 = new Color( 0.8f ,0.8f , 0.8f );
      * // Color c2 = new Color( 0.9f ,0.9f , 0.9f );
      * //
-     * 
+     *
      * // VERSION AVEC CLIPPER.
      * // int startTrackSegmentToDisplay = getVisibleRect().y / getDetectDim().height ;
      * // int lastTrackSegmentToDisplay = ( getVisibleRect().y+getVisibleRect().height ) /
@@ -483,7 +444,7 @@ public class TrackPanel extends JPanel implements MouseListener, MouseMotionList
      * // for ( int tracknb = startTrackSegmentToDisplay ; tracknb < lastTrackSegmentToDisplay ;
      * // tracknb++ )
      * // for ( int tracknb = 0 ; tracknb < trackPool.getTrackSegmentList().size() ; tracknb++ )
-     * 
+     *
      * // TODO : remettre la peinture au fond ( les bandes horizontales. )
      * // boolean switchBackground = false;
      * //
@@ -509,7 +470,7 @@ public class TrackPanel extends JPanel implements MouseListener, MouseMotionList
      * // g2.drawString("#"+tracknb , 10 , detectDim.height*tracknb -2 );
      * //
      * // }
-     * 
+     *
      * // draw current Time Cursor.
      * {
      * g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, .5f));
@@ -518,7 +479,7 @@ public class TrackPanel extends JPanel implements MouseListener, MouseMotionList
      * getVisibleRect().height);
      * g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
      * }
-     * 
+     *
      * // draw current MouseLink user operation.
      * // FIXME : re-introduce mouse link user operations
      * // if (MouseLink.ispressed)
@@ -529,7 +490,7 @@ public class TrackPanel extends JPanel implements MouseListener, MouseMotionList
      * // g2.drawLine(MouseLink.xstart, MouseLink.ystart, MouseLink.xend, MouseLink.yend);
      * // g2.setStroke(new BasicStroke(1));
      * // }
-     * 
+     *
      * // emphasis track selection.
      * // if ( TrackDrag.dragging )
      * // {
@@ -539,9 +500,9 @@ public class TrackPanel extends JPanel implements MouseListener, MouseMotionList
      * // getWidth() , getDetectDim().height );
      * // g2.setComposite( AlphaComposite.getInstance( AlphaComposite.SRC_OVER, 1.0f) );
      * // }
-     * 
+     *
      * // TODO : affiche les liens entre tracks.
-     * 
+     *
      * // {
      * // // Graphics2D g2 = (Graphics2D) this.getGraphics();
      * // // if ( g2 !=null )
@@ -600,9 +561,9 @@ public class TrackPanel extends JPanel implements MouseListener, MouseMotionList
      * // g2.setStroke( new BasicStroke( 1 ) );
      * // }
      * // }
-     * 
+     *
      * // if ( true ) return; // FIXME a enlever
-     * 
+     *
      * // draw links.
      * // {
      * // ArrayList<Link> links = trackPool.getLinks();
@@ -661,22 +622,19 @@ public class TrackPanel extends JPanel implements MouseListener, MouseMotionList
      * //
      * // }
      * // }
-     * 
+     *
      * }
      */
 
-    public Dimension getDetectDim()
-    {
+    public Dimension getDetectDim() {
         return detectDim;
     }
 
-    public void setDetectDim(Dimension detectDim)
-    {
+    public void setDetectDim(Dimension detectDim) {
         this.detectDim = detectDim;
     }
 
-    public void setTrackPool(TrackPool trackPool)
-    {
+    public void setTrackPool(TrackPool trackPool) {
         this.trackPool = trackPool;
         clearDetectionsAndReDisplay();
 
@@ -685,8 +643,7 @@ public class TrackPanel extends JPanel implements MouseListener, MouseMotionList
     /**
      * Clear Detections and redisplay them.
      */
-    private void clearDetectionsAndReDisplay()
-    {
+    private void clearDetectionsAndReDisplay() {
         // do it in background
         ThreadUtil.bgRunSingle(this);
     }
@@ -694,26 +651,19 @@ public class TrackPanel extends JPanel implements MouseListener, MouseMotionList
     /**
      * Recompute all processors
      */
-    public void recomputeProcessors()
-    {
+    public void recomputeProcessors() {
         // important to do it on EDT (otherwise we can get death lock)
-        ThreadUtil.invokeNow(new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                // reset color of detection
-                for (Detection d : trackPool.getAllDetection())
-                    d.reset();
-                // then execute processors (important to do the whole in EDT so painting always happen after all processes)
-                trackPool.computeTrackProcessor();
-            }
+        ThreadUtil.invokeNow(() -> {
+            // reset color of detection
+            for (Detection d : trackPool.getAllDetection())
+                d.reset();
+            // then execute processors (important to do the whole in EDT so painting always happen after all processes)
+            trackPool.computeTrackProcessor();
         });
     }
 
     @Override
-    public void run()
-    {
+    public void run() {
         // refresh processors
         recomputeProcessors();
         // redraw left panel
@@ -722,15 +672,16 @@ public class TrackPanel extends JPanel implements MouseListener, MouseMotionList
         // update painters
         Sequence sequence = trackPool.getDisplaySequence();
         if (sequence != null)
-            sequence.painterChanged(null);
+            //sequence.painterChanged(null);
+            sequence.overlayChanged((Overlay) null);
     }
 
     // boolean disableLeftPanel= false;
+
     /**
      * Re-create the tracking image.
      */
-    public void redrawDetection3()
-    {
+    public void redrawDetection3() {
         if (!enableLeftPanelTrackDisplay)
             return;
 
@@ -746,8 +697,7 @@ public class TrackPanel extends JPanel implements MouseListener, MouseMotionList
         int width = getDetectDim().width * (maxSizeT + 1);
         int height = getDetectDim().height * totalNumberOfTrack;
 
-        if (width * height > maxSize)
-        {
+        if (width * height > maxSize) {
             height = maxSize / width;
             System.out.println(
                     "too much track to display them all in trackManager left panel. Still, they all appear on the sequence.");
@@ -765,23 +715,18 @@ public class TrackPanel extends JPanel implements MouseListener, MouseMotionList
         // drop image if dimensions have changed.
         if (bufferedImage != null)
             if ((bufferedImage.getWidth() != trackingPanelSize.width)
-                    || (bufferedImage.getHeight() != trackingPanelSize.height))
-            {
+                    || (bufferedImage.getHeight() != trackingPanelSize.height)) {
                 bufferedImage = null;
             }
 
-        // create cache image if it does not exists.
-        if (bufferedImage == null)
-        {
-            if (!(trackingPanelSize.width == 0 || trackingPanelSize.height == 0))
-            {
-                try
-                {
+        // create cache image if it does not exist.
+        if (bufferedImage == null) {
+            if (!(trackingPanelSize.width == 0 || trackingPanelSize.height == 0)) {
+                try {
                     bufferedImage = new BufferedImage(trackingPanelSize.width, trackingPanelSize.height,
                             BufferedImage.TYPE_INT_RGB);
                 }
-                catch (OutOfMemoryError e)
-                {
+                catch (OutOfMemoryError e) {
                     System.out.println("can't create " + trackingPanelSize.width + "x" + trackingPanelSize.height
                             + " bitmap for track representation in trackPanel");
                     System.out.println("left panel disabled");
@@ -789,8 +734,7 @@ public class TrackPanel extends JPanel implements MouseListener, MouseMotionList
                     return;
                 }
             }
-            else
-            {
+            else {
                 // no track to display.
                 return;
             }
@@ -800,39 +744,33 @@ public class TrackPanel extends JPanel implements MouseListener, MouseMotionList
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         // fill background
+        Color c1 = new Color(0.8f, 0.8f, 0.8f);
+        Color c2 = new Color(0.9f, 0.9f, 0.9f);
+        int offsetY = 0;
+        boolean switchBackground = true;
+        g.setFont(new Font("Arial", Font.BOLD, detectDim.height - 2));
+        for (TrackGroup trackGroup : trackPool.getTrackGroupList())
+            for (int tracknb = 0; tracknb < trackGroup.getTrackSegmentList().size(); tracknb++) {
+                // display consecutive horizontal bars.
 
-        {
-            Color c1 = new Color(0.8f, 0.8f, 0.8f);
-            Color c2 = new Color(0.9f, 0.9f, 0.9f);
-            int offsetY = 0;
-            boolean switchBackground = true;
-            g.setFont(new Font("Arial", Font.BOLD, detectDim.height - 2));
-            for (TrackGroup trackGroup : trackPool.getTrackGroupList())
-                for (int tracknb = 0; tracknb < trackGroup.getTrackSegmentList().size(); tracknb++)
-                {
-                    // display consecutive horizontal bars.
-
-                    switchBackground = !switchBackground;
-                    if (switchBackground)
-                    {
-                        g.setColor(c1);
-                    }
-                    else
-                    {
-                        g.setColor(c2);
-                    }
-
-                    g.fillRect(0, detectDim.height * offsetY, detectDim.width * (maxSizeT + 1), detectDim.height);
-                    offsetY++;
-
+                switchBackground = !switchBackground;
+                if (switchBackground) {
+                    g.setColor(c1);
                 }
-        }
+                else {
+                    g.setColor(c2);
+                }
+
+                g.fillRect(0, detectDim.height * offsetY, detectDim.width * (maxSizeT + 1), detectDim.height);
+                offsetY++;
+
+            }
 
         // draw detections
 
         int currentLine = 0; // current track line ( y offset )
 
-        HashMap<Detection, Point2D> detectionHashMap = new HashMap<Detection, Point2D>();
+        HashMap<Detection, Point2D> detectionHashMap = new HashMap<>();
 
         for (TrackGroup trackGroup : trackPool.getTrackGroupList())
             for (TrackSegment ts : trackGroup.getTrackSegmentList())
@@ -845,8 +783,7 @@ public class TrackPanel extends JPanel implements MouseListener, MouseMotionList
                 // ts.detectionList.size() );
                 // TrackSegment ts = trackPool.getTrackSegmentList().get( trackSegmentIndex );
 
-                for (int detectionIndex = 0; detectionIndex < ts.getDetectionList().size(); detectionIndex++)
-                {
+                for (int detectionIndex = 0; detectionIndex < ts.getDetectionList().size(); detectionIndex++) {
                     final Detection d = ts.getDetectionList().get(detectionIndex);
 
                     // TrackDetection td = new TrackDetection(d);
@@ -856,9 +793,16 @@ public class TrackPanel extends JPanel implements MouseListener, MouseMotionList
                     // + getDetectDim().width, -0 + getDetectDim().height);
                     // add(td);
 
-                    Rectangle2D bounds = new Rectangle2D.Double(0 + getDetectDim().width * d.getT(),
-                            0 + getDetectDim().height * currentLine, -0 + getDetectDim().width,
-                            -0 + getDetectDim().height);
+                    Rectangle2D bounds = new Rectangle2D.Double(
+                            //0 + getDetectDim().width * d.getT(),
+                            getDetectDim().width * d.getT(),
+                            //0 + getDetectDim().height * currentLine,
+                            getDetectDim().height * currentLine,
+                            //-0 + getDetectDim().width,
+                            getDetectDim().width,
+                            //-0 + getDetectDim().height
+                            getDetectDim().height
+                    );
                     drawDetection(g, d, bounds);
 
                     detectionHashMap.put(d,
@@ -878,16 +822,14 @@ public class TrackPanel extends JPanel implements MouseListener, MouseMotionList
         int detectHeight = getDetectDim().height / 2;
         int detectWidth = getDetectDim().width / 2;
 
-        for (Link link : links)
-        {
+        for (Link link : links) {
             Detection startDetection = link.getStartDetection();
             Detection endDetection = link.getEndDetection();
 
             Point2D startDetectionPoint2D = detectionHashMap.get(startDetection);
             Point2D endDetectionPoint2D = detectionHashMap.get(endDetection);
 
-            if (startDetectionPoint2D != null && endDetectionPoint2D != null)
-            {
+            if (startDetectionPoint2D != null && endDetectionPoint2D != null) {
                 g2.drawLine((int) startDetectionPoint2D.getX() + detectHeight,
                         (int) startDetectionPoint2D.getY() + detectWidth,
                         (int) endDetectionPoint2D.getX() + detectHeight,
@@ -896,7 +838,7 @@ public class TrackPanel extends JPanel implements MouseListener, MouseMotionList
         }
 
         /*
-         * 
+         *
          * // previous version
          * for (TrackGroup trackGroup : trackPool.getTrackGroupList())
          * for (TrackSegment ts : trackGroup.getTrackSegmentList())
@@ -905,7 +847,7 @@ public class TrackPanel extends JPanel implements MouseListener, MouseMotionList
          * if ( lastDetection !=null )
          * {
          * Point2D lastDetectionPoint2D = detectionHashMap.get( lastDetection );
-         * 
+         *
          * for ( TrackSegment tsNext : ts.nextList )
          * {
          * Detection nextDetection = tsNext.getFirstDetection();
@@ -927,45 +869,39 @@ public class TrackPanel extends JPanel implements MouseListener, MouseMotionList
          * }
          * }
          * }
-         * 
+         *
          * }
          */
 
         // display track number
-        {
-            int offsetY = 1;
-            g.setColor(Color.white);
-            for (TrackGroup trackGroup : trackPool.getTrackGroupList())
-            {
-                for (int tracknb = 0; tracknb < trackGroup.getTrackSegmentList().size(); tracknb++)
-                {
-                    g.drawString(trackGroup.getDescription() + " # " + tracknb, 10, detectDim.height * offsetY - 2);
-                    offsetY++;
-                }
+        //int offsetY = 1;
+        offsetY = 1;
+        g.setColor(Color.white);
+        for (TrackGroup trackGroup : trackPool.getTrackGroupList()) {
+            for (int tracknb = 0; tracknb < trackGroup.getTrackSegmentList().size(); tracknb++) {
+                g.drawString(trackGroup.getDescription() + " # " + tracknb, 10, detectDim.height * offsetY - 2);
+                offsetY++;
             }
         }
 
         repaint();
     }
 
-    private void drawDetection(Graphics2D g, Detection d, Rectangle2D bounds)
-    {
+    private void drawDetection(Graphics2D g, Detection d, Rectangle2D bounds) {
 
         g.setColor(d.getColor());
         g.fill(bounds);
         g.setColor(d.getColor().darker());
         g.draw(bounds);
 
-        if (d.isSelected())
-        {
+        if (d.isSelected()) {
             g.setStroke(new BasicStroke(3));
             g.setColor(Color.white);
             g.draw(bounds);
             g.setStroke(new BasicStroke(1));
         }
 
-        if (d.getDetectionType() == Detection.DETECTIONTYPE_VIRTUAL_DETECTION)
-        {
+        if (d.getDetectionType() == Detection.DETECTIONTYPE_VIRTUAL_DETECTION) {
             g.setStroke(new BasicStroke(2));
             g.setColor(Color.white);
             g.drawLine((int) bounds.getMinX(), (int) bounds.getMinY(), (int) bounds.getMaxX(), (int) bounds.getMaxY());
@@ -976,28 +912,25 @@ public class TrackPanel extends JPanel implements MouseListener, MouseMotionList
 
     BufferedImage bufferedImage;
 
-    boolean enableLeftPanelTrackDisplay = true;
+    boolean enableLeftPanelTrackDisplay;
 
     /**
      * Paint the tracking Panel
      */
     @Override
-    protected void paintComponent(Graphics g1)
-    {
+    protected void paintComponent(Graphics g1) {
         super.paintComponent(g1);
         Graphics2D g = (Graphics2D) g1;
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        if (!enableLeftPanelTrackDisplay)
-        {
+        if (!enableLeftPanelTrackDisplay) {
             g.clearRect(0, 0, this.getWidth(), this.getHeight());
             g.drawString("Display disabled. Enable selecting Display > Enable Track Panel", 20, 20);
             return;
         }
 
         int totalNumberOfTrack = trackPool.getTotalNumberOfTrack();
-        if (totalNumberOfTrack == 0)
-        {
+        if (totalNumberOfTrack == 0) {
             g.drawString("No track to display", 20, 20);
         }
 
@@ -1007,31 +940,27 @@ public class TrackPanel extends JPanel implements MouseListener, MouseMotionList
         g.drawImage(bufferedImage, null, 0, 0);
 
         // draw MouseLink
-        if (MouseLink.ispressed)
-        {
+        if (MouseLink.isPressed) {
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g.setStroke(new BasicStroke(2));
             g.setColor(Color.red);
-            g.drawLine(MouseLink.xstart, MouseLink.ystart, MouseLink.xend, MouseLink.yend);
+            g.drawLine(MouseLink.xStart, MouseLink.yStart, MouseLink.xEnd, MouseLink.yEnd);
             g.setStroke(new BasicStroke(1));
         }
 
         // draw current Time Cursor.
-        {
-            g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, .5f));
-            g.setColor(Color.red);
-            g.fillRect(getDetectDim().width * timeCursor.currentT, getVisibleRect().y, getDetectDim().width,
-                    getVisibleRect().height);
-            g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
-        }
+        g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, .5f));
+        g.setColor(Color.red);
+        g.fillRect(getDetectDim().width * timeCursor.currentT, getVisibleRect().y, getDetectDim().width,
+                getVisibleRect().height);
+        g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
 
     }
 
     /**
      * @deprecated replaced by redrawDetection3()
      */
-    public void redrawDetection2()
-    {
+    public void redrawDetection2() {
 
         // FIXME: dimension should update ( le 400 est fixe ici... )
         // old code:
@@ -1068,8 +997,7 @@ public class TrackPanel extends JPanel implements MouseListener, MouseMotionList
                 // ts.detectionList.size() );
                 // TrackSegment ts = trackPool.getTrackSegmentList().get( trackSegmentIndex );
 
-                for (int detectionIndex = 0; detectionIndex < ts.getDetectionList().size(); detectionIndex++)
-                {
+                for (int detectionIndex = 0; detectionIndex < ts.getDetectionList().size(); detectionIndex++) {
                     final Detection d = ts.getDetectionList().get(detectionIndex);
                     // final TrackDetection td ;
                     // ThreadUtil.invokeLater( new Runnable() {
@@ -1083,9 +1011,17 @@ public class TrackPanel extends JPanel implements MouseListener, MouseMotionList
 
                     // System.out.println( "detec : " + getDetectDim().height* ligne );
 
-                    // specification de la taille des panels representant les detections ici.
-                    td.setBounds(0 + getDetectDim().width * d.getT(), 0 + getDetectDim().height * ligne,
-                            -0 + getDetectDim().width, -0 + getDetectDim().height);
+                    // specification de la taille des panels représentant les detections ici.
+                    td.setBounds(
+                            //0 + getDetectDim().width * d.getT(),
+                            getDetectDim().width * d.getT(),
+                            //0 + getDetectDim().height * ligne,
+                            getDetectDim().height * ligne,
+                            //-0 + getDetectDim().width,
+                            getDetectDim().width,
+                            //-0 + getDetectDim().height
+                            getDetectDim().height
+                    );
                     add(td);
                 }
                 ligne++;
@@ -1176,9 +1112,10 @@ public class TrackPanel extends JPanel implements MouseListener, MouseMotionList
 
     }
 
-    /** Should be called when a mouse-link operation has been finished */
-    public void finishMouseConnexion()
-    {
+    /**
+     * Should be called when a mouse-link operation has been finished
+     */
+    public void finishMouseConnexion() {
         // Look for particular case where the detection belongs to the same TrackSegment, and are
         // joined
         // --> cut tracksegment.
@@ -1187,20 +1124,17 @@ public class TrackPanel extends JPanel implements MouseListener, MouseMotionList
         // System.out.println("MouseLink start : " + MouseLink.detectionStart );
         // System.out.println("MouseLink end : " + MouseLink.detectionEnd );
 
-        if (MouseLink.detectionStart != null && MouseLink.detectionEnd != null)
-        {
+        if (MouseLink.detectionStart != null && MouseLink.detectionEnd != null) {
             // System.out.println("Enter detect start & end valid.");
 
             Detection d1 = MouseLink.detectionStart;
             Detection d2 = MouseLink.detectionEnd;
-            if (d1.getT() + 1 == d2.getT())
-            {
-                if (trackPool.getTrackSegmentWithDetection(d1) == trackPool.getTrackSegmentWithDetection(d2))
-                {
+            if (d1.getT() + 1 == d2.getT()) {
+                if (trackPool.getTrackSegmentWithDetection(d1) == trackPool.getTrackSegmentWithDetection(d2)) {
                     trackPool.cutTrackAfterDetection(d1);
-                    if (trackPool.getDisplaySequence() != null)
-                    {
-                        trackPool.getDisplaySequence().painterChanged(null);
+                    if (trackPool.getDisplaySequence() != null) {
+                        //trackPool.getDisplaySequence().painterChanged(null);
+                        trackPool.getDisplaySequence().overlayChanged((Overlay) null);
                     }
                     clearDetectionsAndReDisplay();
                     updateUI();
@@ -1215,29 +1149,29 @@ public class TrackPanel extends JPanel implements MouseListener, MouseMotionList
 
         // updates GUI
         // trackPool.getSequence().painterChanged(null);
-        if (trackPool.getDisplaySequence() != null)
-        {
-            trackPool.getDisplaySequence().painterChanged(null);
+        if (trackPool.getDisplaySequence() != null) {
+            //trackPool.getDisplaySequence().painterChanged(null);
+            trackPool.getDisplaySequence().overlayChanged((Overlay) null);
         }
         clearDetectionsAndReDisplay();
         updateUI();
 
     }
 
-    /** This Internal class is used to create the mouseLink */
-    static class MouseLink
-    {
+    /**
+     * This Internal class is used to create the mouseLink
+     */
+    static class MouseLink {
         static Detection detectionEnd;
         static Detection detectionStart;
-        static int xstart, ystart;
-        static int xend, yend;
-        static boolean ispressed = false;
+        static int xStart, yStart;
+        static int xEnd, yEnd;
+        static boolean isPressed = false;
         // static TrackDetection TrackDetectionStart = null;
         // static TrackDetection TrackDetectionEnd = null;
 
-        public static void clear()
-        {
-            ispressed = false;
+        public static void clear() {
+            isPressed = false;
             detectionStart = null;
             detectionEnd = null;
 
@@ -1246,23 +1180,21 @@ public class TrackPanel extends JPanel implements MouseListener, MouseMotionList
         }
     }
 
-    public void trackPainterChanged(TrackPainterChangeEvent e)
-    {
+    public void trackPainterChanged(TrackPainterChangeEvent e) {
         // that means we may have selected / unselected a track --> repaint the tracks panel
         redrawDetection3();
     }
 
-    /** Called when TSP List change */
-    public void TrackEditorProcessorChange(ChangeEvent e)
-    {
+    /**
+     * Called when TSP List change
+     */
+    public void TrackEditorProcessorChange(ChangeEvent e) {
         clearDetectionsAndReDisplay();
     }
 
     @Override
-    public void viewerChanged(ViewerEvent event)
-    {
-        if (event.getDim() == DimensionId.T)
-        {
+    public void viewerChanged(ViewerEvent event) {
+        if (event.getDim() == DimensionId.T) {
             timeCursor.currentT = event.getSource().getPositionT();
             // trackPool.fireTrackEditorProcessorChange();
             // clearDetectionsAndReDisplay();
@@ -1272,42 +1204,36 @@ public class TrackPanel extends JPanel implements MouseListener, MouseMotionList
 
     // main listener
 
-    public void displaySequenceChanged()
-    {
+    public void displaySequenceChanged() {
         setupViewerListener();
 
     }
 
-    public void setEnableLeftPanelTrackDisplay(boolean selected)
-    {
+    public void setEnableLeftPanelTrackDisplay(boolean selected) {
         this.enableLeftPanelTrackDisplay = selected;
         redrawDetection3();
 
     }
 
     @Override
-    public void viewerClosed(Viewer viewer)
-    {
+    public void viewerClosed(Viewer viewer) {
         setupViewerListener();
     }
 
     @Override
-    public void viewerOpened(Viewer viewer)
-    {
+    public void viewerOpened(Viewer viewer) {
         setupViewerListener();
 
     }
 
     @Override
-    public void sequenceOpened(Sequence sequence)
-    {
+    public void sequenceOpened(Sequence sequence) {
         setupViewerListener();
 
     }
 
     @Override
-    public void sequenceClosed(Sequence sequence)
-    {
+    public void sequenceClosed(Sequence sequence) {
         setupViewerListener();
     }
 

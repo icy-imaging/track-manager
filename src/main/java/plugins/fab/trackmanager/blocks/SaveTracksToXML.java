@@ -15,24 +15,20 @@ import plugins.fab.trackmanager.TrackManager;
 
 /**
  * Block to save a set of ROI to a file
- * 
+ *
  * @author Stephane
  */
-public class SaveTracksToXML extends Plugin implements ROIBlock, PluginLibrary, PluginBundled
-{
-    final Var<TrackGroup> tracks = new Var<TrackGroup>("Track group", new TrackGroup(null));
-    final VarMutable file = new VarMutable("XML file", null)
-    {
+public class SaveTracksToXML extends Plugin implements ROIBlock, PluginLibrary, PluginBundled {
+    final Var<TrackGroup> tracks = new Var<>("Track group", new TrackGroup(null));
+    final VarMutable file = new VarMutable("XML file", null) {
         @Override
-        public boolean isAssignableFrom(@SuppressWarnings("rawtypes") Var source)
-        {
+        public boolean isAssignableFrom(Var source) {
             return (String.class == source.getType()) || (File.class == source.getType());
         }
     };
 
     @Override
-    public void run()
-    {
+    public void run() {
         final TrackGroup group = tracks.getValue();
         // nothing to do
         if (group == null)
@@ -54,21 +50,18 @@ public class SaveTracksToXML extends Plugin implements ROIBlock, PluginLibrary, 
     }
 
     @Override
-    public void declareInput(VarList inputMap)
-    {
+    public void declareInput(VarList inputMap) {
         inputMap.add("tracks", tracks);
         inputMap.add("file", file);
     }
 
     @Override
-    public void declareOutput(VarList outputMap)
-    {
+    public void declareOutput(VarList outputMap) {
         //
     }
 
     @Override
-    public String getMainPluginClassName()
-    {
+    public String getMainPluginClassName() {
         return TrackManager.class.getName();
     }
 }

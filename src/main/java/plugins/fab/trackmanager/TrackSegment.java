@@ -1,20 +1,20 @@
 /*
- * Copyright 2010, 2011 Institut Pasteur.
- * 
+ * Copyright 2010-2023 Institut Pasteur.
+ *
  * This file is part of ICY.
- * 
+ *
  * ICY is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * ICY is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with ICY. If not, see <http://www.gnu.org/licenses/>.
+ * along with ICY. If not, see <https://www.gnu.org/licenses/>.
  */
 package plugins.fab.trackmanager;
 
@@ -30,33 +30,29 @@ import plugins.nchenouard.spot.Detection;
 
 /**
  * TrackSegment is a pool of consecutive detection.
- * 
+ *
  * @author Fabrice de Chaumont
  * @author Stephane
  */
 
-public class TrackSegment implements Cloneable
-{
+public class TrackSegment implements Cloneable {
     // better to use weak reference in the map 
-    protected static Map<Integer, Reference<TrackSegment>> idKeyHashMapList = new HashMap<Integer, Reference<TrackSegment>>(); // 1-1 hashmap.
+    protected final static Map<Integer, Reference<TrackSegment>> idKeyHashMapList = new HashMap<>(); // 1-1 hashmap.
 
-    List<Detection> detectionList = new ArrayList<Detection>();
-    List<TrackSegment> previousList = new ArrayList<TrackSegment>();
-    List<TrackSegment> nextList = new ArrayList<TrackSegment>();
+    List<Detection> detectionList = new ArrayList<>();
+    List<TrackSegment> previousList = new ArrayList<>();
+    List<TrackSegment> nextList = new ArrayList<>();
     private TrackGroup ownerTrackGroup = null;
     private int id = 0;
 
-    public static TrackSegment getTrackSegmentById(int id)
-    {
+    public static TrackSegment getTrackSegmentById(int id) {
         final Integer iid = Integer.valueOf(id);
 
-        synchronized (idKeyHashMapList)
-        {
+        synchronized (idKeyHashMapList) {
             final Reference<TrackSegment> ref = idKeyHashMapList.get(iid);
 
             // null ? --> can remove it from the hashmap
-            if (ref.get() == null)
-            {
+            if (ref.get() == null) {
                 idKeyHashMapList.remove(iid);
             }
 
@@ -64,16 +60,16 @@ public class TrackSegment implements Cloneable
         }
     }
 
-    public TrackSegment()
-    {
+    public TrackSegment() {
         super();
 
         generateId();
     }
 
-    /** Constructor with a list of detection */
-    public TrackSegment(ArrayList<Detection> detectionList)
-    {
+    /**
+     * Constructor with a list of detection
+     */
+    public TrackSegment(ArrayList<Detection> detectionList) {
         super();
 
         this.detectionList = detectionList;
@@ -92,19 +88,17 @@ public class TrackSegment implements Cloneable
     }
 
     @Override
-    protected Object clone() throws CloneNotSupportedException
-    {
+    protected Object clone() throws CloneNotSupportedException {
         TrackSegment cloneSegment = (TrackSegment) super.clone();
 
-        for (Detection detection : detectionList)
-        {
+        for (Detection detection : detectionList) {
             Detection cloneDetection = (Detection) detection.clone();
             // cloneDetection.setOwnerTrackSegment(cloneSegment);
             cloneSegment.detectionList.add(cloneDetection);
         }
 
-        previousList = new ArrayList<TrackSegment>(previousList);
-        nextList = new ArrayList<TrackSegment>(nextList);
+        previousList = new ArrayList<>(previousList);
+        nextList = new ArrayList<>(nextList);
 
         generateId();
 
@@ -112,34 +106,27 @@ public class TrackSegment implements Cloneable
 
     }
 
-    public void removeId()
-    {
-        synchronized (idKeyHashMapList)
-        {
+    public void removeId() {
+        synchronized (idKeyHashMapList) {
             idKeyHashMapList.remove(Integer.valueOf(id));
         }
     }
 
-    public int getId()
-    {
+    public int getId() {
         return id;
     }
 
-    public void generateId()
-    {
+    public void generateId() {
         // just for safety
         removeId();
 
-        synchronized (idKeyHashMapList)
-        {
-            while (true)
-            {
+        synchronized (idKeyHashMapList) {
+            while (true) {
                 final Integer key = Integer.valueOf(Random.nextInt());
 
                 // available ?
-                if (idKeyHashMapList.get(key) == null)
-                {
-                    idKeyHashMapList.put(key, new WeakReference<TrackSegment>(this));
+                if (idKeyHashMapList.get(key) == null) {
+                    idKeyHashMapList.put(key, new WeakReference<>(this));
                     id = key.intValue();
 
                     return;
@@ -148,16 +135,13 @@ public class TrackSegment implements Cloneable
         }
     }
 
-    public void setId(int id)
-    {
+    public void setId(int id) {
         final Integer key = Integer.valueOf(id);
 
-        synchronized (idKeyHashMapList)
-        {
+        synchronized (idKeyHashMapList) {
             // available ?
-            if (idKeyHashMapList.get(key) == null)
-            {
-                idKeyHashMapList.put(key, new WeakReference<TrackSegment>(this));
+            if (idKeyHashMapList.get(key) == null) {
+                idKeyHashMapList.put(key, new WeakReference<>(this));
                 this.id = key.intValue();
             }
             else
@@ -165,22 +149,25 @@ public class TrackSegment implements Cloneable
         }
     }
 
-    /** */
-    public boolean containsDetection(Detection detection)
-    {
+    /**
+     *
+     */
+    public boolean containsDetection(Detection detection) {
         return detectionList.contains(detection);
     }
 
-    /** set all dependent selection */
-    public void setAllDetectionEnabled(boolean selected)
-    {
+    /**
+     * set all dependent selection
+     */
+    public void setAllDetectionEnabled(boolean selected) {
         for (Detection d : detectionList)
             d.setEnabled(selected);
     }
 
-    /** is all dependent selection are enabled */
-    public boolean isAllDetectionEnabled()
-    {
+    /**
+     * is all dependent selection are enabled
+     */
+    public boolean isAllDetectionEnabled() {
         if (detectionList.isEmpty())
             return false;
 
@@ -192,16 +179,18 @@ public class TrackSegment implements Cloneable
         return result;
     }
 
-    /** set all dependent selection */
-    public void setAllDetectionSelected(boolean selected)
-    {
+    /**
+     * set all dependent selection
+     */
+    public void setAllDetectionSelected(boolean selected) {
         for (Detection d : detectionList)
             d.setSelected(selected);
     }
 
-    /** check if all dependent selection are selected */
-    public boolean isAllDetectionSelected()
-    {
+    /**
+     * check if all dependent selection are selected
+     */
+    public boolean isAllDetectionSelected() {
         if (detectionList.isEmpty())
             return false;
 
@@ -213,14 +202,13 @@ public class TrackSegment implements Cloneable
         return result;
     }
 
-    /** Add a detection in the segmentTrack */
-    public void addDetection(Detection detection)
-    {
-        if (detectionList.size() > 0)
-        {
+    /**
+     * Add a detection in the segmentTrack
+     */
+    public void addDetection(Detection detection) {
+        if (detectionList.size() > 0) {
             Detection detectionPrevious = getLastDetection();
-            if (detection.getT() != detectionPrevious.getT() + 1)
-            {
+            if (detection.getT() != detectionPrevious.getT() + 1) {
                 System.err.println(
                         "TrackSegment : The detection must be added with consecutive T value. Detection was not added");
                 // throw new IllegalArgumentException();
@@ -238,67 +226,73 @@ public class TrackSegment implements Cloneable
         detectionList.add(detection);
     }
 
-    public void removeDetection(Detection detection)
-    {
+    public void removeDetection(Detection detection) {
         // detection.setOwnerTrackSegment(null);
         detectionList.remove(detection);
     }
 
-    /** Remove a detection in the segmentTrack */
-    public void removeLastDetection()
-    {
+    /**
+     * Remove a detection in the segmentTrack
+     */
+    public void removeLastDetection() {
         // getLastDetection().ownerTrackSegment = null;
         detectionList.remove(getLastDetection());
     }
 
-    /** Add a TrackSegment before this trackSegment */
-    public void addPrevious(TrackSegment trackSegment)
-    {
+    /**
+     * Add a TrackSegment before this trackSegment
+     */
+    public void addPrevious(TrackSegment trackSegment) {
         previousList.add(trackSegment);
         trackSegment.nextList.add(this);
     }
 
-    /** Remove a TrackSegment before this trackSegment */
-    public void removePrevious(TrackSegment trackSegment)
-    {
+    /**
+     * Remove a TrackSegment before this trackSegment
+     */
+    public void removePrevious(TrackSegment trackSegment) {
         previousList.remove(trackSegment);
         trackSegment.nextList.remove(this);
     }
 
-    /** Add a TrackSegment after this trackSegment */
-    public void addNext(TrackSegment trackSegment)
-    {
+    /**
+     * Add a TrackSegment after this trackSegment
+     */
+    public void addNext(TrackSegment trackSegment) {
         nextList.add(trackSegment);
         trackSegment.previousList.add(this);
     }
 
-    /** Remove a TrackSegment after this trackSegment */
-    public void removeNext(TrackSegment trackSegment)
-    {
+    /**
+     * Remove a TrackSegment after this trackSegment
+     */
+    public void removeNext(TrackSegment trackSegment) {
         nextList.remove(trackSegment);
         trackSegment.previousList.remove(this);
     }
 
-    /** return first detection ( should be first in time too ) */
-    public Detection getFirstDetection()
-    {
+    /**
+     * return first detection ( should be first in time too )
+     */
+    public Detection getFirstDetection() {
         if (detectionList.size() == 0)
             return null;
 
         return detectionList.get(0);
     }
 
-    /** return detection at index i */
-    public Detection getDetectionAt(int i)
-    {
+    /**
+     * return detection at index i
+     */
+    public Detection getDetectionAt(int i) {
         return detectionList.get(i);
     }
 
-    /** return detection at time t */
-    public Detection getDetectionAtTime(int t)
-    {
-        for (Detection detection : detectionList)
-        {
+    /**
+     * return detection at time t
+     */
+    public Detection getDetectionAtTime(int t) {
+        for (Detection detection : detectionList) {
             if (detection.getT() == t)
                 return detection;
         }
@@ -314,43 +308,41 @@ public class TrackSegment implements Cloneable
      * Detection
      * to be correctly updated.
      */
-    public ArrayList<Detection> getDetectionList()
-    {
+    public ArrayList<Detection> getDetectionList() {
         return (ArrayList<Detection>) detectionList;
     }
 
-    /** return last detection ( should be last in time too ) */
-    public Detection getLastDetection()
-    {
+    /**
+     * return last detection ( should be last in time too )
+     */
+    public Detection getLastDetection() {
         if (detectionList.size() == 0)
             return null;
 
         return detectionList.get(detectionList.size() - 1);
     }
 
-    /** return detection index */
-    public int getDetectionIndex(Detection detection)
-    {
+    /**
+     * return detection index
+     */
+    public int getDetectionIndex(Detection detection) {
         return detectionList.indexOf(detection);
     }
 
-    public void setOwnerTrackGroup(TrackGroup tg)
-    {
+    public void setOwnerTrackGroup(TrackGroup tg) {
         ownerTrackGroup = tg;
     }
 
-    public TrackGroup getOwnerTrackGroup()
-    {
+    public TrackGroup getOwnerTrackGroup() {
         return ownerTrackGroup;
     }
 
-    public void removeAllLinks()
-    {
-        List<TrackSegment> previousListCopy = new ArrayList<TrackSegment>(previousList);
+    public void removeAllLinks() {
+        List<TrackSegment> previousListCopy = new ArrayList<>(previousList);
         for (TrackSegment previousTrackSegment : previousListCopy)
             removePrevious(previousTrackSegment);
 
-        List<TrackSegment> nextListCopy = new ArrayList<TrackSegment>(nextList);
+        List<TrackSegment> nextListCopy = new ArrayList<>(nextList);
         for (TrackSegment nextTrackSegment : nextListCopy)
             removeNext(nextTrackSegment);
     }
