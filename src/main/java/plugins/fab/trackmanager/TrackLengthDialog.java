@@ -1,24 +1,39 @@
-package plugins.fab.trackmanager;
+/*
+ * Copyright (c) 2010-2023. Institut Pasteur.
+ *
+ * This file is part of Icy.
+ * Icy is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Icy is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
+ */
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+package plugins.fab.trackmanager;
 
 import icy.gui.dialog.ActionDialog;
 import icy.gui.util.GuiUtil;
 
-import javax.swing.BoxLayout;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class TrackLengthDialog implements ActionListener {
 
     JTextField textField = new JTextField("3-10");
     TrackPool trackPool;
 
-    public TrackLengthDialog(TrackPool trackPool) {
+    public TrackLengthDialog(final TrackPool trackPool) {
 
         this.trackPool = trackPool;
-        ActionDialog actionDialog = new ActionDialog("Select by length");
+        final ActionDialog actionDialog = new ActionDialog("Select by length");
         actionDialog.getContentPane().setLayout(
                 new BoxLayout(actionDialog.getContentPane(), BoxLayout.PAGE_AXIS));
 
@@ -35,23 +50,23 @@ public class TrackLengthDialog implements ActionListener {
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
+    public void actionPerformed(final ActionEvent e) {
 
-        String text = textField.getText();
+        final String text = textField.getText();
 
-        String[] values = text.split("-");
+        final String[] values = text.split("-");
         int lowVal;
         int highVal;
         try {
             lowVal = Integer.parseInt(values[0]);
         }
-        catch (Exception e1) {
+        catch (final Exception e1) {
             lowVal = 0;
         }
         try {
             highVal = Integer.parseInt(values[1]);
         }
-        catch (Exception e1) {
+        catch (final Exception e1) {
             highVal = Integer.MAX_VALUE;
         }
 

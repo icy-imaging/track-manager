@@ -1,34 +1,22 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2023. Institut Pasteur.
  *
- * This file is part of ICY.
- *
- * ICY is free software: you can redistribute it and/or modify
+ * This file is part of Icy.
+ * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ICY is distributed in the hope that it will be useful,
+ * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with ICY. If not, see <https://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
-package plugins.fab.trackmanager;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
-import java.awt.event.MouseEvent;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Line2D;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
-import java.util.ArrayList;
-import java.util.List;
+package plugins.fab.trackmanager;
 
 import icy.canvas.Canvas2D;
 import icy.canvas.IcyCanvas;
@@ -40,8 +28,17 @@ import icy.util.GraphicsUtil;
 import icy.util.ShapeUtil;
 import plugins.nchenouard.spot.Detection;
 
+import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * Painter used to display tracks on sequence (as overlay)
+ * Painter used to display tracks on the sequence (as overlay)
  *
  * @author Fabrice de Chaumont
  */
@@ -56,7 +53,7 @@ public class TrackManagerPainter extends Overlay {
     private boolean drawTracksOnSequence = true;
     private boolean subPixelicDisplay = true;
 
-    public TrackManagerPainter(TrackPool trackPool) {
+    public TrackManagerPainter(final TrackPool trackPool) {
         super("Track painter");
 
         this.trackPool = trackPool;
@@ -66,12 +63,12 @@ public class TrackManagerPainter extends Overlay {
         return subPixelicDisplay;
     }
 
-    public void setSubPixelicDisplay(boolean subPixelicDisplay) {
+    public void setSubPixelicDisplay(final boolean subPixelicDisplay) {
         this.subPixelicDisplay = subPixelicDisplay;
     }
 
     @Override
-    public void mouseClick(MouseEvent e, /*Point2D p*/ Point5D.Double imagePoint, IcyCanvas icyCanvas) {
+    public void mouseClick(final MouseEvent e, /*Point2D p*/ final Point5D.Double imagePoint, final IcyCanvas icyCanvas) {
         if (e.isConsumed())
             return;
 
@@ -79,9 +76,9 @@ public class TrackManagerPainter extends Overlay {
         distanceThresholdSqr *= distanceThresholdSqr;
 
         // Check if a detection is around.
-        for (TrackGroup tg : trackPool.getTrackGroupList()) {
-            for (TrackSegment ts : tg.getTrackSegmentList()) {
-                for (Detection d : ts.getDetectionList()) {
+        for (final TrackGroup tg : trackPool.getTrackGroupList()) {
+            for (final TrackSegment ts : tg.getTrackSegmentList()) {
+                for (final Detection d : ts.getDetectionList()) {
                     if (d.isEnabled()) {
                         //final double dist = new Point2D.Double(p.getX(), p.getY()).distanceSq(new Point2D.Double(d.getX(), d.getY()));
                         final Point2D p2d = imagePoint.toPoint2D();
@@ -89,7 +86,7 @@ public class TrackManagerPainter extends Overlay {
                                 .distanceSq(new Point2D.Double(d.getX(), d.getY()));
 
                         if (dist < distanceThresholdSqr) {
-                            TrackSegment ts1 = trackPool.getTrackSegmentWithDetection(d);
+                            final TrackSegment ts1 = trackPool.getTrackSegmentWithDetection(d);
                             if (ts1 != null) {
                                 ts1.setAllDetectionSelected(!ts1.isAllDetectionSelected());
                                 trackPool.getDisplaySequence().overlayChanged(this);
@@ -311,7 +308,7 @@ public class TrackManagerPainter extends Overlay {
     // }
 
     @Override
-    public void paint(Graphics2D g, Sequence sequence, IcyCanvas canvas) {
+    public void paint(final Graphics2D g, final Sequence sequence, final IcyCanvas canvas) {
 
         // System.out.println("TP");
 
@@ -355,7 +352,7 @@ public class TrackManagerPainter extends Overlay {
             // shift 0.5 to display track in the center of pixel
             g2.translate(0.5d, 0.5d);
 
-            float trackWidth = (float) canvas.canvasToImageLogDeltaX(2);
+            final float trackWidth = (float) canvas.canvasToImageLogDeltaX(2);
 
             g2.setStroke(new BasicStroke(trackWidth));
 
@@ -365,9 +362,9 @@ public class TrackManagerPainter extends Overlay {
             final List<TrackLineSection> connectorSections = new ArrayList<>();
 
             if (trackPool != null) {
-                for (SwimmingObject result : trackPool.resultList) {
+                for (final SwimmingObject result : trackPool.resultList) {
                     final TrackGroup tg = (TrackGroup) result.getObject();
-                    for (TrackSegment ts : tg.getTrackSegmentList()) {
+                    for (final TrackSegment ts : tg.getTrackSegmentList()) {
                         final List<Detection> detectionList = ts.getDetectionList();
 
                         allDetections.addAll(detectionList);
@@ -387,7 +384,7 @@ public class TrackManagerPainter extends Overlay {
 
                         // connector between 2 tracks
                         if (ts.getLastDetection().isEnabled()) {
-                            for (TrackSegment tsNext : ts.nextList) {
+                            for (final TrackSegment tsNext : ts.nextList) {
                                 final Detection endDetection = tsNext.getFirstDetection();
 
                                 if (endDetection.isEnabled())
@@ -402,7 +399,7 @@ public class TrackManagerPainter extends Overlay {
             g2.setStroke(new BasicStroke(trackWidth * 3));
             g2.setColor(Color.white);
 
-            for (TrackLineSection lineSection : lineSections) {
+            for (final TrackLineSection lineSection : lineSections) {
                 if (lineSection.isEnabled() && lineSection.isSelected() && GraphicsUtil.isVisible(g2, lineSection.getBounds(bounds, trackWidth * 2)))
                     g2.draw(lineSection.getLine2D(line));
             }
@@ -410,7 +407,7 @@ public class TrackManagerPainter extends Overlay {
             // display tracks
             g2.setStroke(new BasicStroke(trackWidth));
 
-            for (TrackLineSection lineSection : lineSections) {
+            for (final TrackLineSection lineSection : lineSections) {
                 if (lineSection.isEnabled() && GraphicsUtil.isVisible(g2, lineSection.getBounds(bounds, trackWidth))) {
                     g2.setColor(lineSection.getColor());
                     g2.draw(lineSection.getLine2D(line));
@@ -420,13 +417,13 @@ public class TrackManagerPainter extends Overlay {
             // display link between tracks
             g2.setColor(Color.green);
 
-            for (TrackLineSection lineSection : connectorSections) {
+            for (final TrackLineSection lineSection : connectorSections) {
                 if (GraphicsUtil.isVisible(g2, lineSection.getBounds(bounds, trackWidth)))
                     g2.draw(lineSection.getLine2D(line));
             }
 
             // display detections
-            for (Detection detection : allDetections) {
+            for (final Detection detection : allDetections) {
                 // current detection is visible
                 if (detection.isEnabled() && (detection.getT() == canvas.getPositionT()))
                 // && (Math.round(detection.getZ()) == canvas.getPositionZ()))
@@ -451,14 +448,14 @@ public class TrackManagerPainter extends Overlay {
     /**
      * add a listener
      */
-    public void addTrackPainterListener(TrackPainterListener trackPainterListener) {
+    public void addTrackPainterListener(final TrackPainterListener trackPainterListener) {
         this.trackPainterListener.add(trackPainterListener);
     }
 
     /**
      * remove a listener
      */
-    public void removeTrackPainterListener(TrackPainterListener trackPainterListener) {
+    public void removeTrackPainterListener(final TrackPainterListener trackPainterListener) {
         this.trackPainterListener.remove(trackPainterListener);
     }
 
@@ -475,7 +472,7 @@ public class TrackManagerPainter extends Overlay {
      * fire event with a non-specific TrackPainterChangeEvent
      */
     private void fireTrackPainterEvent() {
-        for (TrackPainterListener tpl : trackPainterListener) {
+        for (final TrackPainterListener tpl : trackPainterListener) {
             tpl.trackPainterChanged(new TrackPainterChangeEvent(this));
         }
     }
@@ -484,7 +481,7 @@ public class TrackManagerPainter extends Overlay {
         return drawTracksOnSequence;
     }
 
-    public void setDrawTracksOnSequence(boolean drawTracksOnSequence) {
+    public void setDrawTracksOnSequence(final boolean drawTracksOnSequence) {
         this.drawTracksOnSequence = drawTracksOnSequence;
     }
 
@@ -514,14 +511,14 @@ public class TrackManagerPainter extends Overlay {
         final Detection start;
         final Detection end;
 
-        public TrackLineSection(Detection start, Detection end) {
+        public TrackLineSection(final Detection start, final Detection end) {
             super();
 
             this.start = start;
             this.end = end;
         }
 
-        public Line2D getLine2D(Line2D line) {
+        public Line2D getLine2D(final Line2D line) {
             line.setLine(start.getX(), start.getY(), end.getX(), end.getY());
             return line;
         }
@@ -530,7 +527,7 @@ public class TrackManagerPainter extends Overlay {
             return start.getColor();
         }
 
-        public Rectangle2D getBounds(Rectangle2D bounds, float stroke) {
+        public Rectangle2D getBounds(final Rectangle2D bounds, final float stroke) {
             bounds.setFrameFromDiagonal(start.getX(), start.getY(), end.getX(), end.getY());
             ShapeUtil.enlarge(bounds, stroke, stroke, true);
             return bounds;

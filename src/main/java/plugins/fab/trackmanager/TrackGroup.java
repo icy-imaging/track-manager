@@ -1,28 +1,27 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2023. Institut Pasteur.
  *
- * This file is part of ICY.
- *
- * ICY is free software: you can redistribute it and/or modify
+ * This file is part of Icy.
+ * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ICY is distributed in the hope that it will be useful,
+ * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with ICY. If not, see <https://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package plugins.fab.trackmanager;
 
 import icy.sequence.Sequence;
+import plugins.nchenouard.spot.Detection;
 
 import java.util.ArrayList;
-
-import plugins.nchenouard.spot.Detection;
 
 public class TrackGroup {
     private final Sequence sequence;
@@ -31,7 +30,7 @@ public class TrackGroup {
      */
     private final ArrayList<TrackSegment> trackSegmentList;
 
-    public TrackGroup(Sequence sequence) {
+    public TrackGroup(final Sequence sequence) {
         this.sequence = sequence;
         trackSegmentList = new ArrayList<>();
     }
@@ -47,7 +46,7 @@ public class TrackGroup {
         return trackSegmentList;
     }
 
-    public void addTrackSegment(TrackSegment ts) {
+    public void addTrackSegment(final TrackSegment ts) {
         if (ts.getOwnerTrackGroup() != null) {
             System.err.println("The trackSegment is already owned by another TrackGroup.");
             return;
@@ -59,11 +58,11 @@ public class TrackGroup {
         trackSegmentList.add(ts);
     }
 
-    public TrackSegment getTrackSegmentWithDetection(Detection detection) {
+    public TrackSegment getTrackSegmentWithDetection(final Detection detection) {
 
-        ArrayList<TrackSegment> trackSegmentList = getTrackSegmentList();
+        final ArrayList<TrackSegment> trackSegmentList = getTrackSegmentList();
 
-        for (TrackSegment ts : trackSegmentList) {
+        for (final TrackSegment ts : trackSegmentList) {
             if (ts.containsDetection(detection)) return ts;
         }
 
@@ -71,14 +70,14 @@ public class TrackGroup {
     }
 
     public void clearAllTrackSegment() {
-        ArrayList<TrackSegment> trackSegmentListCopy = new ArrayList<>(trackSegmentList);
+        final ArrayList<TrackSegment> trackSegmentListCopy = new ArrayList<>(trackSegmentList);
 
-        for (TrackSegment ts : trackSegmentListCopy) {
+        for (final TrackSegment ts : trackSegmentListCopy) {
             removeTrackSegment(ts);
         }
     }
 
-    public void removeTrackSegment(TrackSegment ts) {
+    public void removeTrackSegment(final TrackSegment ts) {
         // should remove links
         ts.setOwnerTrackGroup(null);
         ts.removeAllLinks();
@@ -91,7 +90,7 @@ public class TrackGroup {
         return description;
     }
 
-    public void setDescription(String description) {
+    public void setDescription(final String description) {
         this.description = description;
     }
 

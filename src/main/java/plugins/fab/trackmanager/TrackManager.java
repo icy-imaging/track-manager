@@ -1,54 +1,22 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2023. Institut Pasteur.
  *
- * This file is part of ICY.
- *
- * ICY is free software: you can redistribute it and/or modify
+ * This file is part of Icy.
+ * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ICY is distributed in the hope that it will be useful,
+ * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with ICY. If not, see <https://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package plugins.fab.trackmanager;
-
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.AdjustmentEvent;
-import java.awt.event.AdjustmentListener;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.prefs.Preferences;
-
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.JToggleButton;
-import javax.swing.border.TitledBorder;
-import javax.swing.filechooser.FileNameExtensionFilter;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import icy.file.FileUtil;
 import icy.gui.component.PopupPanel;
@@ -72,8 +40,24 @@ import icy.swimmingPool.SwimmingObject;
 import icy.swimmingPool.SwimmingPoolEvent;
 import icy.swimmingPool.SwimmingPoolEventType;
 import icy.swimmingPool.SwimmingPoolListener;
+import icy.system.IcyExceptionHandler;
 import icy.util.XMLUtil;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import plugins.nchenouard.spot.Detection;
+
+import javax.swing.*;
+import javax.swing.border.TitledBorder;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.AdjustmentEvent;
+import java.awt.event.AdjustmentListener;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.prefs.Preferences;
 
 /**
  * @author Fabrice de Chaumont
@@ -98,31 +82,36 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
         Class<? extends PluginTrackManagerProcessor> pluginTrackManagerProcessor;
         PluginDescriptor pluginDescriptor;
 
-        public MenuItemActionListener(PluginDescriptor pluginDescriptor,
-                                      Class<? extends PluginTrackManagerProcessor> pluginTrackEditorProcessor) {
+        public MenuItemActionListener(final PluginDescriptor pluginDescriptor,
+                                      final Class<? extends PluginTrackManagerProcessor> pluginTrackEditorProcessor) {
             this.pluginTrackManagerProcessor = pluginTrackEditorProcessor;
             this.pluginDescriptor = pluginDescriptor;
         }
 
         @Override
-        public void actionPerformed(ActionEvent event) {
+        public void actionPerformed(final ActionEvent event) {
             loadTrackProcessor(pluginDescriptor);
         }
 
     }
 
-    void loadTrackProcessor(PluginDescriptor pluginDescriptor) {
+    void loadTrackProcessor(final PluginDescriptor pluginDescriptor) {
+
+        if (pluginDescriptor== null || pluginDescriptor.getPluginClass() == null) {
+            System.err.println("Can't load processor (plugin not found)");
+            return;
+        }
 
         PluginTrackManagerProcessor ptep = null;
         try {
             ptep = (PluginTrackManagerProcessor) pluginDescriptor.getPluginClass().getDeclaredConstructor().newInstance();
         }
-        catch (Exception e) {
-            e.printStackTrace();
+        catch (final Exception e) {
+            IcyExceptionHandler.showErrorMessage(e, true);
         }
 
         if (ptep == null) {
-            System.out.println("Can't load processor.");
+            System.err.println("Can't load processor.");
             return;
         }
 
@@ -143,7 +132,7 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
 
         rightContentPanel.removeAll();
 
-        for (PluginTrackManagerProcessor trackProcessor : trackPool.getTrackManagerProcessorList()) {
+        for (final PluginTrackManagerProcessor trackProcessor : trackPool.getTrackManagerProcessorList()) {
             rightContentPanel.add(trackProcessor.getPanel());
         }
 
@@ -251,10 +240,10 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
         scrollPane.setBorder(new TitledBorder("Track View"));
         scrollPane.getVerticalScrollBar().addAdjustmentListener(this);
 
-        JPanel optionTrackPanel = new JPanel();
+        final JPanel optionTrackPanel = new JPanel();
         optionTrackPanel.setLayout(new GridLayout(1, 4));
 
-        JMenu fileMenu = new JMenu("File");
+        final JMenu fileMenu = new JMenu("File");
 
         fileMenu.add(loadMenuItem);
         fileMenu.add(saveMenuItem);
@@ -265,7 +254,7 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
         saveMenuItem.addActionListener(this);
         loadFromTrackMateMenuItem.addActionListener(this);
 
-        JMenu editMenu = new JMenu("Edit");
+        final JMenu editMenu = new JMenu("Edit");
 
         editMenu.add(selectAllMenuItem);
         editMenu.add(unselectAllMenuItem);
@@ -292,7 +281,7 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
         // clearTrackPoolMenuItem.addActionListener(this);
         externaliseCheckBoxMenuItem.addActionListener(this);
 
-        JMenu displayMenu = new JMenu("Display");
+        final JMenu displayMenu = new JMenu("Display");
         displayMenu.add(displayTrackPanelCheckBoxMenuItem);
 
         displayMenu.add(externaliseCheckBoxMenuItem);
@@ -306,7 +295,7 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
         trackingGroupSourceMenu.add(trackingGroupSourceHelpMenuItem);
         trackingGroupSourceHelpMenuItem.setEnabled(false);
 
-        JMenu helpMenu = new JMenu("Help");
+        final JMenu helpMenu = new JMenu("Help");
         onlineHelpMenuItem = new JMenuItem("Help...");
         helpMenu.add(onlineHelpMenuItem);
         onlineHelpMenuItem.addActionListener(this);
@@ -330,7 +319,7 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
         // zoomYLessButton.addActionListener(this);
         // zoomYMoreButton.addActionListener(this);
 
-        JPanel trackPoolSourcePanel = GuiUtil.generatePanelWithoutBorder();
+        final JPanel trackPoolSourcePanel = GuiUtil.generatePanelWithoutBorder();
 
         trackPoolSourcePanel.add(GuiUtil.besidesPanel(new JLabel("Display results on sequence:"), sequenceSelector));
 
@@ -338,7 +327,7 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
         // trackPoolSourcePanel.add(GuiUtil.besidesPanel(trackGroupSourceInnerPanel));
         // trackPoolSourcePanel.add( trackGroupSourceInnerPanel ) ;
 
-        JPanel tpp = GuiUtil.generatePanel();
+        final JPanel tpp = GuiUtil.generatePanel();
         showHideTrackPoolSourcesPanel.addActionListener(this);
 
         tpp.add(GuiUtil.besidesPanel(trackPoolSourcePanel));
@@ -349,14 +338,14 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
         // mainFrame.getContentPane().setLayout(new GridLayout(1, 2));
 
         leftPanel = new JPanel(new BorderLayout());
-        JPanel southPanel = new JPanel(new BorderLayout());
+        final JPanel southPanel = new JPanel(new BorderLayout());
 
         deetPanel.setSize(400, 200);
         deetPanel.add(new JLabel("-----------------"));
 
         southPanel.add(deetPanel, BorderLayout.NORTH);
 
-        JPanel northPanel = new JPanel();
+        final JPanel northPanel = new JPanel();
         northPanel.setLayout(new BorderLayout());
         northPanel.add(scrollPane, BorderLayout.CENTER);
         northPanel.add(optionTrackPanel, BorderLayout.SOUTH);
@@ -370,11 +359,11 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
         rightContentPanel.setLayout(new BoxLayout(rightContentPanel, BoxLayout.PAGE_AXIS));
         // rightContentPanel.setLayout( new BorderLayout() );
 
-        JPanel intermediatePanel = new JPanel(new BorderLayout());
+        final JPanel intermediatePanel = new JPanel(new BorderLayout());
         intermediatePanel.add(rightContentPanel, BorderLayout.NORTH);
         intermediatePanel.add(Box.createGlue(), BorderLayout.CENTER);
 
-        JScrollPane rightScrollPanel = new JScrollPane(intermediatePanel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+        final JScrollPane rightScrollPanel = new JScrollPane(intermediatePanel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
         // JScrollPane rightScrollPanel = new JScrollPane(rightContentPanel,
         // JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
         // JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
@@ -390,7 +379,7 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
 
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.LINE_AXIS));
 
-        JSplitPane mainSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, rightPanel);
+        final JSplitPane mainSplitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, rightPanel);
 
         mainPanel.add(mainSplitPane);
 
@@ -413,7 +402,7 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
         sequenceSelector.addActionListener(this);
 
         // add the trackColor Processor
-        PluginDescriptor pd = PluginLoader.getPlugin("plugins.fab.trackmanager.processors.TrackProcessorColorTrack");
+        final PluginDescriptor pd = PluginLoader.getPlugin("plugins.fab.trackmanager.processors.TrackProcessorColorTrack");
         loadTrackProcessor(pd);
 
     }
@@ -423,14 +412,14 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
      * another trackeditor, the trackgroup checkbox is disabled.
      */
     @Override
-    public void swimmingPoolChangeEvent(SwimmingPoolEvent swimmingPoolEvent) {
+    public void swimmingPoolChangeEvent(final SwimmingPoolEvent swimmingPoolEvent) {
         if (swimmingPoolEvent.getType() == SwimmingPoolEventType.ELEMENT_ADDED) {
             // System.out.println("TrackManager : swimming pool element added.");
             // System.out.println("object: " +
             // swimmingPoolEvent.getResult().getObject().getClass());
 
             if (swimmingPoolEvent.getResult().getObject() instanceof TrackGroup) {
-                CheckBoxResultSource checkBoxResultSource = new CheckBoxResultSource(swimmingPoolEvent.getResult(),
+                final CheckBoxResultSource checkBoxResultSource = new CheckBoxResultSource(swimmingPoolEvent.getResult(),
                         true);
                 trackingGroupSourceMenu.add(checkBoxResultSource);
                 // trackGroupSourceInnerPanel.add(checkBoxResultSource);
@@ -447,9 +436,9 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
             }
 
             for (int i = 0; i < trackingGroupSourceMenu.getItemCount(); i++) {
-                JMenuItem mi = trackingGroupSourceMenu.getItem(i);
+                final JMenuItem mi = trackingGroupSourceMenu.getItem(i);
                 if (mi instanceof CheckBoxResultSource) {
-                    CheckBoxResultSource cbrs = (CheckBoxResultSource) mi;
+                    final CheckBoxResultSource cbrs = (CheckBoxResultSource) mi;
 
                     if (cbrs.result == swimmingPoolEvent.getResult()) {
                         cbrs.destroy();
@@ -485,11 +474,11 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
 
         // trackGroupSourceInnerPanel.removeAll();
 
-        ArrayList<SwimmingObject> swimmingPoolArrayList = Icy.getMainInterface().getSwimmingPool().getObjects();
+        final ArrayList<SwimmingObject> swimmingPoolArrayList = Icy.getMainInterface().getSwimmingPool().getObjects();
 
-        for (SwimmingObject result : swimmingPoolArrayList) {
+        for (final SwimmingObject result : swimmingPoolArrayList) {
             if (result.getObject() instanceof TrackGroup) {
-                boolean enabled = true;
+                final boolean enabled = true;
                 // for (TrackManager trackEditor : trackManagerList)
                 // {
                 // if (trackEditor.getResultList().contains(result))
@@ -499,7 +488,7 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
                 // }
                 // }
 
-                CheckBoxResultSource checkBoxResultResource = new CheckBoxResultSource( // "" +
+                final CheckBoxResultSource checkBoxResultResource = new CheckBoxResultSource( // "" +
                         // result.getObject().toString(),
                         result, enabled);
 
@@ -560,13 +549,13 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
         return currentT;
     }
 
-    public void setCurrentPositionT(int t) {
+    public void setCurrentPositionT(final int t) {
         currentT = t;
         reSynchroTSequence();
         trackPool.fireTrackEditorProcessorChange();
     }
 
-    void timeCursorChanged(int t) {
+    void timeCursorChanged(final int t) {
         setCurrentPositionT(t);
     }
 
@@ -581,9 +570,9 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
         // sequence.setT(currentT);
         // }
 
-        Sequence sequence = sequenceSelector.getSelectedSequence();
+        final Sequence sequence = sequenceSelector.getSelectedSequence();
         if (sequence != null) {
-            for (Viewer viewer : Icy.getMainInterface().getViewers(sequence)) {
+            for (final Viewer viewer : Icy.getMainInterface().getViewers(sequence)) {
                 viewer.setPositionT(currentT);
             }
             // sequence.setT( currentT );
@@ -597,16 +586,16 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
         // JToggleButton trackTimeOnSequenceButton = new JToggleButton("T");
         SwimmingObject result;
 
-        public CheckBoxResultSource(SwimmingObject result, boolean enabled) {
+        public CheckBoxResultSource(final SwimmingObject result, final boolean enabled) {
             if (!(result.getObject() instanceof TrackGroup)) {
                 System.out.println("Result object type not supported.");
                 return;
             }
 
-            TrackGroup trackGroup = (TrackGroup) result.getObject();
-            int nbTracks = trackGroup.getTrackSegmentList().size();
+            final TrackGroup trackGroup = (TrackGroup) result.getObject();
+            final int nbTracks = trackGroup.getTrackSegmentList().size();
 
-            String label = result.getObject().toString() + " (" + nbTracks + " Tracks)";
+            final String label = result.getObject().toString() + " (" + nbTracks + " Tracks)";
 
             // trackTimeOnSequenceButton.setToolTipText("Keep Time synchro with sequence");
             // trackTimeOnSequenceButton.setSelected( true ) ;
@@ -662,7 +651,7 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
         }
 
         @Override
-        public void actionPerformed(ActionEvent e) {
+        public void actionPerformed(final ActionEvent e) {
 
             // if (e.getSource() == trackTimeOnSequenceButton)
             // {
@@ -725,18 +714,18 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
     }
 
     private void loadTracks() {
-        JFileChooser chooser = new JFileChooser();
+        final JFileChooser chooser = new JFileChooser();
         chooser.setDialogTitle("Select track.xml file.");
 
         chooser.setFileFilter(new FileNameExtensionFilter("XML track file", "xml"));
 
-        String node = "plugins/fab/trackmanager/browser";
+        final String node = "plugins/fab/trackmanager/browser";
 
-        Preferences preferences = Preferences.userRoot().node(node);
-        String path = preferences.get("path", "");
+        final Preferences preferences = Preferences.userRoot().node(node);
+        final String path = preferences.get("path", "");
         chooser.setCurrentDirectory(new File(path));
 
-        int returnVal = chooser.showOpenDialog(null);
+        final int returnVal = chooser.showOpenDialog(null);
         if (returnVal != JFileChooser.APPROVE_OPTION)
             return;
 
@@ -746,24 +735,24 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
             final List<TrackGroup> groups = loadTracks(chooser.getSelectedFile().getAbsolutePath());
 
             // add group to swimming pool
-            for (TrackGroup group : groups) {
-                SwimmingObject so = new SwimmingObject(group);
+            for (final TrackGroup group : groups) {
+                final SwimmingObject so = new SwimmingObject(group);
                 Icy.getMainInterface().getSwimmingPool().add(so);
             }
 
             trackPool.fireTrackEditorProcessorChange();
         }
-        catch (IllegalArgumentException ex) {
+        catch (final IllegalArgumentException ex) {
             MessageDialog.showDialog(ex.getMessage(), MessageDialog.ERROR_MESSAGE);
         }
     }
 
-    public static List<TrackGroup> loadTracks(String path) throws IllegalArgumentException {
+    public static List<TrackGroup> loadTracks(final String path) throws IllegalArgumentException {
         final Document document = XMLUtil.loadDocument(path, false);
         return loadTracks(document);
     }
 
-    public static List<TrackGroup> loadTracks(Document document) throws IllegalArgumentException {
+    public static List<TrackGroup> loadTracks(final Document document) throws IllegalArgumentException {
         if (document == null)
             throw new IllegalArgumentException("Invalid track file !");
 
@@ -774,12 +763,12 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
 
         final List<TrackGroup> result = new ArrayList<>();
 
-        for (Element trackGroupElement : XMLUtil.getElements(rootElement, "trackgroup")) {
+        for (final Element trackGroupElement : XMLUtil.getElements(rootElement, "trackgroup")) {
             // create track group
             final TrackGroup trackGroup = new TrackGroup(null);
             trackGroup.setDescription(XMLUtil.getAttributeValue(trackGroupElement, "description", "no description"));
 
-            for (Element trackSegmentElement : XMLUtil.getElements(trackGroupElement)) {
+            for (final Element trackSegmentElement : XMLUtil.getElements(trackGroupElement)) {
                 // create track segment
                 final TrackSegment trackSegment = new TrackSegment();
                 final int id = XMLUtil.getAttributeIntValue(trackSegmentElement, "id", -1);
@@ -789,7 +778,7 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
                 else
                     trackSegment.setId(id);
 
-                for (Element detectionElement : XMLUtil.getElements(trackSegmentElement)) {
+                for (final Element detectionElement : XMLUtil.getElements(trackSegmentElement)) {
                     // create detection
                     final Detection detection = Detection.createDetection(XMLUtil.getAttributeValue(detectionElement,
                             "classname", "plugins.nchenouard.spot.Detection"));
@@ -809,8 +798,8 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
         }
 
         // get links
-        for (Element linkListElement : XMLUtil.getElements(rootElement, "linklist")) {
-            for (Element link : XMLUtil.getElements(linkListElement)) {
+        for (final Element linkListElement : XMLUtil.getElements(rootElement, "linklist")) {
+            for (final Element link : XMLUtil.getElements(linkListElement)) {
                 final int idFrom = XMLUtil.getAttributeIntValue(link, "from", -1);
                 final int idTo = XMLUtil.getAttributeIntValue(link, "to", -1);
 
@@ -826,18 +815,18 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
     }
 
     private void loadTracksFromTrackMate() {
-        JFileChooser chooser = new JFileChooser();
+        final JFileChooser chooser = new JFileChooser();
         chooser.setDialogTitle("Import TrackMate xml track file.");
 
         chooser.setFileFilter(new FileNameExtensionFilter("TrackMate XML track file", "xml"));
 
-        String node = "plugins/fab/trackmanager/browser";
+        final String node = "plugins/fab/trackmanager/browser";
 
-        Preferences preferences = Preferences.userRoot().node(node);
-        String path = preferences.get("path", "");
+        final Preferences preferences = Preferences.userRoot().node(node);
+        final String path = preferences.get("path", "");
         chooser.setCurrentDirectory(new File(path));
 
-        int returnVal = chooser.showOpenDialog(null);
+        final int returnVal = chooser.showOpenDialog(null);
         if (returnVal != JFileChooser.APPROVE_OPTION)
             return;
 
@@ -847,24 +836,24 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
             final List<TrackGroup> groups = loadTracksFromTrackMate(chooser.getSelectedFile().getAbsolutePath());
 
             // add group to swimming pool
-            for (TrackGroup group : groups) {
-                SwimmingObject so = new SwimmingObject(group);
+            for (final TrackGroup group : groups) {
+                final SwimmingObject so = new SwimmingObject(group);
                 Icy.getMainInterface().getSwimmingPool().add(so);
             }
 
             trackPool.fireTrackEditorProcessorChange();
         }
-        catch (IllegalArgumentException ex) {
+        catch (final IllegalArgumentException ex) {
             MessageDialog.showDialog(ex.getMessage(), MessageDialog.ERROR_MESSAGE);
         }
     }
 
-    public static List<TrackGroup> loadTracksFromTrackMate(String path) {
+    public static List<TrackGroup> loadTracksFromTrackMate(final String path) {
         final Document document = XMLUtil.loadDocument(path, false);
         return loadTracksFromTrackMate(document);
     }
 
-    public static List<TrackGroup> loadTracksFromTrackMate(Document document) throws IllegalArgumentException {
+    public static List<TrackGroup> loadTracksFromTrackMate(final Document document) throws IllegalArgumentException {
         if (document == null)
             throw new IllegalArgumentException("Invalid track file !");
 
@@ -879,12 +868,12 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
         //if (unit.equals("micron"))
         //    unitMultiplicator = 0.000001d;
 
-        for (Element trackElement : XMLUtil.getElements(document.getDocumentElement().getParentNode(), "Tracks")) {
+        for (final Element trackElement : XMLUtil.getElements(document.getDocumentElement().getParentNode(), "Tracks")) {
             // create track group
             final TrackGroup trackGroup = new TrackGroup(null);
             trackGroup.setDescription(XMLUtil.getAttributeValue(trackElement, "description", "no description"));
 
-            for (Element trackSegmentElement : XMLUtil.getElements(trackElement)) {
+            for (final Element trackSegmentElement : XMLUtil.getElements(trackElement)) {
                 // create track segment
                 final TrackSegment trackSegment = new TrackSegment();
 
@@ -894,7 +883,7 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
                 else
                     trackSegment.setId(id);
 
-                for (Element detectionElement : XMLUtil.getElements(trackSegmentElement)) {
+                for (final Element detectionElement : XMLUtil.getElements(trackSegmentElement)) {
                     // create detection
                     final Detection detection = Detection.createDetection("plugins.nchenouard.spot.Detection");
 
@@ -930,17 +919,17 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
     }
 
     private void saveTracks() {
-        JFileChooser chooser = new JFileChooser();
+        final JFileChooser chooser = new JFileChooser();
         chooser.setDialogTitle("Select track.xml file.");
         chooser.setFileFilter(new FileNameExtensionFilter("XML track file", "xml"));
 
-        String node = "plugins/fab/trackmanager/browser";
+        final String node = "plugins/fab/trackmanager/browser";
 
-        Preferences preferences = Preferences.userRoot().node(node);
-        String path = preferences.get("path", "");
+        final Preferences preferences = Preferences.userRoot().node(node);
+        final String path = preferences.get("path", "");
         chooser.setCurrentDirectory(new File(path));
 
-        int returnVal = chooser.showSaveDialog(null);
+        final int returnVal = chooser.showSaveDialog(null);
         if (returnVal != JFileChooser.APPROVE_OPTION)
             return;
 
@@ -949,7 +938,7 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
         saveTracks(chooser.getSelectedFile().getAbsolutePath(), trackPool.getTrackGroupList());
     }
 
-    public static void saveTracks(String path, List<TrackGroup> groups) {
+    public static void saveTracks(final String path, final List<TrackGroup> groups) {
         // get file
         final File file = new File(FileUtil.setExtension(path, ".xml"));
         // generate document
@@ -958,22 +947,22 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
         XMLUtil.saveDocument(document, file);
     }
 
-    public static Document saveTracks(List<TrackGroup> groups) {
+    public static Document saveTracks(final List<TrackGroup> groups) {
         final Document result = XMLUtil.createDocument(true);
         final Element rootElement = result.getDocumentElement();
 
         final Element versionElement = XMLUtil.addElement(rootElement, "trackfile");
         versionElement.setAttribute("version", "1");
 
-        for (TrackGroup trackGroup : groups) {
+        for (final TrackGroup trackGroup : groups) {
             final Element trackGroupElement = XMLUtil.addElement(rootElement, "trackgroup");
             trackGroupElement.setAttribute("description", trackGroup.getDescription());
 
-            for (TrackSegment trackSegment : trackGroup.getTrackSegmentList()) {
+            for (final TrackSegment trackSegment : trackGroup.getTrackSegmentList()) {
                 final Element trackElement = XMLUtil.addElement(trackGroupElement, "track");
                 trackElement.setAttribute("id", String.valueOf(trackSegment.getId()));
 
-                for (Detection detection : trackSegment.getDetectionList()) {
+                for (final Detection detection : trackSegment.getDetectionList()) {
                     final Element detectionElement = XMLUtil.addElement(trackElement, "detection");
 
                     detectionElement.setAttribute("classname", detection.getClass().getName());
@@ -988,7 +977,7 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
 
         // save links
         final Element linklistElement = XMLUtil.addElement(rootElement, "linklist");
-        for (Link link : TrackPool.getLinks(groups)) {
+        for (final Link link : TrackPool.getLinks(groups)) {
             final Element trackElement = XMLUtil.addElement(linklistElement, "link");
 
             trackElement.setAttribute("from", String.valueOf(link.getStartSegment().getId()));
@@ -1002,19 +991,17 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
      * Attempt to re-classify / re-organize the track order to improve track understandment.
      */
     public void reOrganize() {
-        for (TrackGroup trackGroup : trackPool.getTrackGroupList()) {
-            @SuppressWarnings("unchecked")
-            List<TrackSegment> trackSegmentList = (ArrayList<TrackSegment>) trackGroup.getTrackSegmentList().clone();
-            @SuppressWarnings("unchecked")
-            List<TrackSegment> trackSegmentListOrganized = (ArrayList<TrackSegment>) trackGroup.getTrackSegmentList().clone();
+        for (final TrackGroup trackGroup : trackPool.getTrackGroupList()) {
+            @SuppressWarnings("unchecked") final List<TrackSegment> trackSegmentList = (ArrayList<TrackSegment>) trackGroup.getTrackSegmentList().clone();
+            @SuppressWarnings("unchecked") final List<TrackSegment> trackSegmentListOrganized = (ArrayList<TrackSegment>) trackGroup.getTrackSegmentList().clone();
 
-            int tMax = trackPool.getLastDetectionTimePoint();
+            final int tMax = trackPool.getLastDetectionTimePoint();
 
             for (int t = 0; t < tMax; t++)
-                for (TrackSegment ts : trackSegmentList) {
+                for (final TrackSegment ts : trackSegmentList) {
                     if (ts.getFirstDetection().getT() == t) {
                         for (int index = 0; index < ts.nextList.size(); index++) {
-                            TrackSegment ts2 = ts.nextList.get(index);
+                            final TrackSegment ts2 = ts.nextList.get(index);
                             trackSegmentListOrganized.remove(ts2);
                             int targetIndex = trackSegmentListOrganized.indexOf(ts) - ts.nextList.size() / 2 + index
                                     + 1;
@@ -1036,7 +1023,7 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
+    public void actionPerformed(final ActionEvent e) {
         if (e.getSource() == onlineHelpMenuItem) {
             NetworkUtil.openBrowser("https://icy.bioimageanalysis.org/plugin/track-manager/");
         }
@@ -1064,8 +1051,8 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
         if (e.getSource() == displayTrackPanelCheckBoxMenuItem) {
             trackPanel.setEnableLeftPanelTrackDisplay(displayTrackPanelCheckBoxMenuItem.isSelected());
 
-            String node = "plugins/fab/trackmanager/displaytrackpanel";
-            Preferences preferences = Preferences.userRoot().node(node);
+            final String node = "plugins/fab/trackmanager/displaytrackpanel";
+            final Preferences preferences = Preferences.userRoot().node(node);
 
             preferences.putBoolean("displaytrackpanel", displayTrackPanelCheckBoxMenuItem.isSelected());
 
@@ -1102,20 +1089,20 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
         }
 
         //if (e.getSource() == selectTrackByLengthMenuItem) {
-            //TrackLengthDialog tld = new TrackLengthDialog(trackPool);
+        //TrackLengthDialog tld = new TrackLengthDialog(trackPool);
 
-            // TrackLengthDialog tld = new TrackLengthDialog();
-            // JDialog dialog = new JDialog();
-            // JPanel panel = new JPanel();
-            // panel.setLayout( new FlowLayout(FlowLayout.LEFT) );
-            // panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 0));
-            // JTextField textfield = new JTextField(8);
-            // textfield.setBounds(10, 10, 40, 20);
-            // panel.add(textfield);
-            // dialog.add(panel);
-            // dialog.setSize(200, 100);
-            // dialog.setLocationRelativeTo(null);
-            // dialog.setVisible(true);
+        // TrackLengthDialog tld = new TrackLengthDialog();
+        // JDialog dialog = new JDialog();
+        // JPanel panel = new JPanel();
+        // panel.setLayout( new FlowLayout(FlowLayout.LEFT) );
+        // panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 0));
+        // JTextField textfield = new JTextField(8);
+        // textfield.setBounds(10, 10, 40, 20);
+        // panel.add(textfield);
+        // dialog.add(panel);
+        // dialog.setSize(200, 100);
+        // dialog.setLocationRelativeTo(null);
+        // dialog.setVisible(true);
         //}
 
         if (e.getSource() == invertSelectionMenuItem) {
@@ -1169,7 +1156,7 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
     }
 
     @Override
-    public void adjustmentValueChanged(AdjustmentEvent arg0) {
+    public void adjustmentValueChanged(final AdjustmentEvent arg0) {
 
     }
 
@@ -1178,16 +1165,16 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
         pluginPopupMenu.removeAll();
 
         {
-            JMenuItem menuItem = new JMenuItem("Add Track Processor Plugin...");
+            final JMenuItem menuItem = new JMenuItem("Add Track Processor Plugin...");
             menuItem.setEnabled(false);
             pluginPopupMenu.add(menuItem);
             pluginPopupMenu.addSeparator();
         }
 
-        for (PluginDescriptor plugin : PluginLoader.getPlugins()) {
+        for (final PluginDescriptor plugin : PluginLoader.getPlugins()) {
             if (plugin.isInstanceOf(PluginTrackManagerProcessor.class))
                 if (!plugin.isAbstract()) {
-                    JMenuItem menuItem = new JMenuItem(plugin.getName(), ResourceUtil.scaleIcon(plugin.getIcon(), 24));
+                    final JMenuItem menuItem = new JMenuItem(plugin.getName(), ResourceUtil.scaleIcon(plugin.getIcon(), 24));
 
                     pluginPopupMenu.add(menuItem);
 
@@ -1198,7 +1185,7 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
 
     }
 
-    public void moveTrackProcessor(PluginTrackManagerProcessor trackEditorProcessor, int i) {
+    public void moveTrackProcessor(final PluginTrackManagerProcessor trackEditorProcessor, final int i) {
         int newIndex = trackPool.getTrackManagerProcessorList().indexOf(trackEditorProcessor);
         // System.out.println("previous index: " + newIndex );
         newIndex += i;
@@ -1221,12 +1208,12 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
     }
 
     @Override
-    public void icyFrameActivated(IcyFrameEvent e) {
+    public void icyFrameActivated(final IcyFrameEvent e) {
 
     }
 
     @Override
-    public void icyFrameClosed(IcyFrameEvent e) {
+    public void icyFrameClosed(final IcyFrameEvent e) {
         // release T synchro with sequences.
         // sequenceToKeepSynchronizeInT.clear();
 
@@ -1244,9 +1231,8 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
 
         // close all track processors.
 
-        @SuppressWarnings("unchecked")
-        ArrayList<PluginTrackManagerProcessor> processorList = (ArrayList<PluginTrackManagerProcessor>) trackPool.getTrackManagerProcessorList().clone();
-        for (PluginTrackManagerProcessor tep : processorList) {
+        @SuppressWarnings("unchecked") final ArrayList<PluginTrackManagerProcessor> processorList = (ArrayList<PluginTrackManagerProcessor>) trackPool.getTrackManagerProcessorList().clone();
+        for (final PluginTrackManagerProcessor tep : processorList) {
             tep.Close();
         }
 
@@ -1262,37 +1248,37 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
     }
 
     @Override
-    public void icyFrameClosing(IcyFrameEvent e) {
+    public void icyFrameClosing(final IcyFrameEvent e) {
 
     }
 
     @Override
-    public void icyFrameDeactivated(IcyFrameEvent e) {
+    public void icyFrameDeactivated(final IcyFrameEvent e) {
 
     }
 
     @Override
-    public void icyFrameDeiconified(IcyFrameEvent e) {
+    public void icyFrameDeiconified(final IcyFrameEvent e) {
 
     }
 
     @Override
-    public void icyFrameIconified(IcyFrameEvent e) {
+    public void icyFrameIconified(final IcyFrameEvent e) {
 
     }
 
     @Override
-    public void icyFrameOpened(IcyFrameEvent e) {
+    public void icyFrameOpened(final IcyFrameEvent e) {
 
     }
 
     @Override
-    public void icyFrameExternalized(IcyFrameEvent e) {
+    public void icyFrameExternalized(final IcyFrameEvent e) {
 
     }
 
     @Override
-    public void icyFrameInternalized(IcyFrameEvent e) {
+    public void icyFrameInternalized(final IcyFrameEvent e) {
 
     }
 
@@ -1306,7 +1292,7 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
         return sequenceSelector.getSelectedSequence();
     }
 
-    public void setDisplaySequence(Sequence sequence) {
+    public void setDisplaySequence(final Sequence sequence) {
         sequenceSelector.setSelectedSequence(sequence);
 
     }

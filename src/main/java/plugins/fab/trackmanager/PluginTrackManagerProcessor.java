@@ -1,41 +1,35 @@
 /*
- * Copyright 2010-2023 Institut Pasteur.
+ * Copyright (c) 2010-2023. Institut Pasteur.
  *
- * This file is part of ICY.
- *
- * ICY is free software: you can redistribute it and/or modify
+ * This file is part of Icy.
+ * Icy is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * ICY is distributed in the hope that it will be useful,
+ * Icy is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with ICY. If not, see <https://www.gnu.org/licenses/>.
+ * along with Icy. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package plugins.fab.trackmanager;
-
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
 
 import icy.gui.component.PopupPanel;
 import icy.gui.util.GuiUtil;
 import icy.plugin.abstract_.Plugin;
 
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 public abstract class PluginTrackManagerProcessor extends Plugin {
 
     /**
-     * Panel to used by inherited class to display data
+     * Panel used by inherited class to display data
      */
     protected JPanel panel = new JPanel();
     private final PopupPanel mainPanel = new PopupPanel("no name");
@@ -54,7 +48,7 @@ public abstract class PluginTrackManagerProcessor extends Plugin {
         enabledCheckBox.setSelected(true);
         enabledCheckBox.addActionListener(actionButton);
 
-        JPanel commandPanel = GuiUtil.createLineBoxPanel(enabledCheckBox, Box.createHorizontalGlue(), performanceLabel,
+        final JPanel commandPanel = GuiUtil.createLineBoxPanel(enabledCheckBox, Box.createHorizontalGlue(), performanceLabel,
                 moveUpButton, moveDownButton, closeButton);
 
         closeButton.addActionListener(actionButton);
@@ -72,7 +66,7 @@ public abstract class PluginTrackManagerProcessor extends Plugin {
         mainPanel.getMainPanel().add(GuiUtil.createLineBoxPanel(panel));
     }
 
-    protected void setName(String name) {
+    protected void setName(final String name) {
         mainPanel.setTitle(name);
     }
 
@@ -81,7 +75,8 @@ public abstract class PluginTrackManagerProcessor extends Plugin {
     }
 
     class ActionButton implements ActionListener {
-        public void actionPerformed(ActionEvent e) {
+        @Override
+        public void actionPerformed(final ActionEvent e) {
 
             if (e.getSource() == closeButton) {
                 Close();
@@ -110,13 +105,13 @@ public abstract class PluginTrackManagerProcessor extends Plugin {
      */
     public abstract void Compute();
 
-    public void setPerformance(int ms) {
+    public void setPerformance(final int ms) {
         performanceLabel.setText(ms + " ms ");
     }
 
     private void removeTrackProcessor() {
         trackPool.removeTrackProcessor(this);
-        JPanel parent = (JPanel) mainPanel.getParent();
+        final JPanel parent = (JPanel) mainPanel.getParent();
         parent.remove(mainPanel);
         parent.revalidate();
     }
@@ -134,7 +129,7 @@ public abstract class PluginTrackManagerProcessor extends Plugin {
         super.finalize();
     }
 
-    public final void setTrackPool(TrackPool trackPool) {
+    public final void setTrackPool(final TrackPool trackPool) {
         this.trackPool = trackPool;
     }
 
