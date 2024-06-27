@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,16 +18,16 @@
 
 package plugins.fab.trackmanager;
 
-import icy.gui.main.GlobalSequenceListener;
-import icy.gui.main.GlobalViewerListener;
-import icy.gui.viewer.Viewer;
-import icy.gui.viewer.ViewerEvent;
-import icy.gui.viewer.ViewerListener;
-import icy.main.Icy;
-import icy.painter.Overlay;
-import icy.sequence.DimensionId;
-import icy.sequence.Sequence;
-import icy.system.thread.ThreadUtil;
+import org.bioimageanalysis.icy.Icy;
+import org.bioimageanalysis.icy.gui.listener.GlobalSequenceListener;
+import org.bioimageanalysis.icy.gui.listener.GlobalViewerListener;
+import org.bioimageanalysis.icy.gui.viewer.Viewer;
+import org.bioimageanalysis.icy.gui.viewer.ViewerEvent;
+import org.bioimageanalysis.icy.gui.viewer.ViewerListener;
+import org.bioimageanalysis.icy.model.overlay.Overlay;
+import org.bioimageanalysis.icy.model.sequence.DimensionId;
+import org.bioimageanalysis.icy.model.sequence.Sequence;
+import org.bioimageanalysis.icy.system.thread.ThreadUtil;
 import plugins.nchenouard.spot.Detection;
 
 import javax.swing.*;
@@ -47,8 +47,7 @@ import java.util.HashMap;
  *
  * @author Fabrice de Chaumont
  */
-public class TrackPanel extends JPanel implements MouseListener, MouseMotionListener, TrackPainterListener,
-        TrackManagerProcessorListener, ViewerListener, GlobalSequenceListener, GlobalViewerListener, Runnable {
+public class TrackPanel extends JPanel implements MouseListener, MouseMotionListener, TrackPainterListener, TrackManagerProcessorListener, ViewerListener, GlobalSequenceListener, GlobalViewerListener, Runnable {
 
     TimeCursor timeCursor = new TimeCursor();
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,30 +18,31 @@
 
 package plugins.fab.trackmanager;
 
-import icy.file.FileUtil;
-import icy.gui.component.PopupPanel;
-import icy.gui.component.sequence.SequenceChooser;
-import icy.gui.dialog.MessageDialog;
-import icy.gui.frame.IcyFrame;
-import icy.gui.frame.IcyFrameEvent;
-import icy.gui.frame.IcyFrameListener;
-import icy.gui.frame.progress.AnnounceFrame;
-import icy.gui.util.ComponentUtil;
-import icy.gui.util.GuiUtil;
-import icy.gui.viewer.Viewer;
-import icy.main.Icy;
-import icy.network.NetworkUtil;
-import icy.plugin.PluginDescriptor;
-import icy.plugin.PluginLoader;
-import icy.plugin.abstract_.PluginActionable;
-import icy.resource.ResourceUtil;
-import icy.sequence.Sequence;
-import icy.swimmingPool.SwimmingObject;
-import icy.swimmingPool.SwimmingPoolEvent;
-import icy.swimmingPool.SwimmingPoolEventType;
-import icy.swimmingPool.SwimmingPoolListener;
-import icy.system.IcyExceptionHandler;
-import icy.util.XMLUtil;
+import org.bioimageanalysis.icy.Icy;
+import org.bioimageanalysis.icy.extension.plugin.PluginDescriptor;
+import org.bioimageanalysis.icy.extension.plugin.PluginLoader;
+import org.bioimageanalysis.icy.extension.plugin.abstract_.PluginActionable;
+import org.bioimageanalysis.icy.extension.plugin.annotation_.IcyPluginIcon;
+import org.bioimageanalysis.icy.extension.plugin.annotation_.IcyPluginName;
+import org.bioimageanalysis.icy.gui.GuiUtil;
+import org.bioimageanalysis.icy.gui.component.ComponentUtil;
+import org.bioimageanalysis.icy.gui.component.panel.PopupPanel;
+import org.bioimageanalysis.icy.gui.dialog.MessageDialog;
+import org.bioimageanalysis.icy.gui.frame.IcyFrame;
+import org.bioimageanalysis.icy.gui.frame.IcyFrameEvent;
+import org.bioimageanalysis.icy.gui.frame.IcyFrameListener;
+import org.bioimageanalysis.icy.gui.frame.progress.AnnounceFrame;
+import org.bioimageanalysis.icy.gui.sequence.SequenceChooser;
+import org.bioimageanalysis.icy.gui.viewer.Viewer;
+import org.bioimageanalysis.icy.io.FileUtil;
+import org.bioimageanalysis.icy.io.xml.XMLUtil;
+import org.bioimageanalysis.icy.model.sequence.Sequence;
+import org.bioimageanalysis.icy.model.swimmingPool.SwimmingObject;
+import org.bioimageanalysis.icy.model.swimmingPool.SwimmingPoolEvent;
+import org.bioimageanalysis.icy.model.swimmingPool.SwimmingPoolEventType;
+import org.bioimageanalysis.icy.model.swimmingPool.SwimmingPoolListener;
+import org.bioimageanalysis.icy.network.NetworkUtil;
+import org.bioimageanalysis.icy.system.IcyExceptionHandler;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import plugins.nchenouard.spot.Detection;
@@ -62,8 +63,9 @@ import java.util.prefs.Preferences;
 /**
  * @author Fabrice de Chaumont
  */
+@IcyPluginName("Track Manager")
+@IcyPluginIcon(path = "/track-manager.png")
 public class TrackManager extends PluginActionable implements AdjustmentListener, ActionListener, SwimmingPoolListener, IcyFrameListener {
-
     /*
      * List of active trackEditor shared between trackeditors (not used anymore)
      */
@@ -97,7 +99,7 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
 
     void loadTrackProcessor(final PluginDescriptor pluginDescriptor) {
 
-        if (pluginDescriptor== null || pluginDescriptor.getPluginClass() == null) {
+        if (pluginDescriptor == null || pluginDescriptor.getPluginClass() == null) {
             System.err.println("Can't load processor (plugin not found)");
             return;
         }
@@ -1174,7 +1176,7 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
         for (final PluginDescriptor plugin : PluginLoader.getPlugins()) {
             if (plugin.isInstanceOf(PluginTrackManagerProcessor.class))
                 if (!plugin.isAbstract()) {
-                    final JMenuItem menuItem = new JMenuItem(plugin.getName(), ResourceUtil.scaleIcon(plugin.getIcon(), 24));
+                    final JMenuItem menuItem = new JMenuItem(plugin.getName(), new ImageIcon(plugin.getIcon().getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH)));
 
                     pluginPopupMenu.add(menuItem);
 

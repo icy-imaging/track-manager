@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,10 +18,12 @@
 
 package plugins.fab.trackmanager.blocks;
 
-import icy.plugin.abstract_.Plugin;
-import icy.plugin.interface_.PluginBundled;
-import icy.plugin.interface_.PluginLibrary;
-import icy.type.collection.CollectionUtil;
+import org.bioimageanalysis.icy.common.collection.CollectionUtil;
+import org.bioimageanalysis.icy.extension.plugin.abstract_.Plugin;
+import org.bioimageanalysis.icy.extension.plugin.annotation_.IcyPluginIcon;
+import org.bioimageanalysis.icy.extension.plugin.annotation_.IcyPluginName;
+import org.bioimageanalysis.icy.extension.plugin.interface_.PluginBundled;
+import org.bioimageanalysis.icy.extension.plugin.interface_.PluginLibrary;
 import plugins.adufour.blocks.tools.roi.ROIBlock;
 import plugins.adufour.blocks.util.VarList;
 import plugins.adufour.vars.lang.Var;
@@ -36,6 +38,8 @@ import java.io.File;
  *
  * @author Stephane
  */
+@IcyPluginName("Save Tracks To XML")
+@IcyPluginIcon(path = "/track-manager.png")
 public class SaveTracksToXML extends Plugin implements ROIBlock, PluginLibrary, PluginBundled {
     final Var<TrackGroup> tracks = new Var<>("Track group", new TrackGroup(null));
     final VarMutable file = new VarMutable("XML file", null) {

@@ -21,7 +21,6 @@ package plugins.fab.trackmanager;
 import plugins.nchenouard.spot.Detection;
 
 public class Link {
-
     TrackSegment start;
     TrackSegment end;
 

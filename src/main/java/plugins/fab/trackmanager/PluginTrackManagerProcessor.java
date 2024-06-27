@@ -18,16 +18,15 @@
 
 package plugins.fab.trackmanager;
 
-import icy.gui.component.PopupPanel;
-import icy.gui.util.GuiUtil;
-import icy.plugin.abstract_.Plugin;
+import org.bioimageanalysis.icy.extension.plugin.abstract_.Plugin;
+import org.bioimageanalysis.icy.gui.GuiUtil;
+import org.bioimageanalysis.icy.gui.component.panel.PopupPanel;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public abstract class PluginTrackManagerProcessor extends Plugin {
-
     /**
      * Panel used by inherited class to display data
      */
@@ -123,11 +122,11 @@ public abstract class PluginTrackManagerProcessor extends Plugin {
         return mainPanel;
     }
 
-    @Override
+    /*@Override
     protected void finalize() throws Throwable {
         trackPool = null;
         super.finalize();
-    }
+    }*/
 
     public final void setTrackPool(final TrackPool trackPool) {
         this.trackPool = trackPool;

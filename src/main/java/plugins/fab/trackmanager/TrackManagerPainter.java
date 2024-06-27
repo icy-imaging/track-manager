@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,14 +18,14 @@
 
 package plugins.fab.trackmanager;
 
-import icy.canvas.Canvas2D;
-import icy.canvas.IcyCanvas;
-import icy.painter.Overlay;
-import icy.sequence.Sequence;
-import icy.swimmingPool.SwimmingObject;
-import icy.type.point.Point5D;
-import icy.util.GraphicsUtil;
-import icy.util.ShapeUtil;
+import org.bioimageanalysis.icy.common.geom.point.Point5D;
+import org.bioimageanalysis.icy.common.geom.shape.ShapeUtil;
+import org.bioimageanalysis.icy.gui.GraphicsUtil;
+import org.bioimageanalysis.icy.gui.canvas.Canvas2D;
+import org.bioimageanalysis.icy.gui.canvas.IcyCanvas;
+import org.bioimageanalysis.icy.model.overlay.Overlay;
+import org.bioimageanalysis.icy.model.sequence.Sequence;
+import org.bioimageanalysis.icy.model.swimmingPool.SwimmingObject;
 import plugins.nchenouard.spot.Detection;
 
 import java.awt.*;
@@ -371,7 +371,7 @@ public class TrackManagerPainter extends Overlay {
 
                         // line sections
                         if (detectionList.size() > 1) {
-                            Detection startDetection = detectionList.get(0);
+                            Detection startDetection = detectionList.getFirst();
 
                             for (int i = 1; i < ts.getDetectionList().size(); i++) {
                                 final Detection endDetection = detectionList.get(i);

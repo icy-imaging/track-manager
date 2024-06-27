@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,11 +18,11 @@
 
 package plugins.fab.trackmanager;
 
-import icy.gui.dialog.MessageDialog;
-import icy.gui.frame.progress.AnnounceFrame;
-import icy.main.Icy;
-import icy.sequence.Sequence;
-import icy.swimmingPool.SwimmingObject;
+import org.bioimageanalysis.icy.Icy;
+import org.bioimageanalysis.icy.gui.dialog.MessageDialog;
+import org.bioimageanalysis.icy.gui.frame.progress.AnnounceFrame;
+import org.bioimageanalysis.icy.model.sequence.Sequence;
+import org.bioimageanalysis.icy.model.swimmingPool.SwimmingObject;
 import plugins.nchenouard.spot.Detection;
 
 import javax.swing.event.ChangeEvent;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,8 +18,8 @@
 
 package plugins.fab.trackmanager;
 
-import icy.gui.dialog.ActionDialog;
-import icy.gui.util.GuiUtil;
+import org.bioimageanalysis.icy.gui.GuiUtil;
+import org.bioimageanalysis.icy.gui.dialog.ActionDialog;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -31,7 +31,6 @@ public class TrackLengthDialog implements ActionListener {
     TrackPool trackPool;
 
     public TrackLengthDialog(final TrackPool trackPool) {
-
         this.trackPool = trackPool;
         final ActionDialog actionDialog = new ActionDialog("Select by length");
         actionDialog.getContentPane().setLayout(

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -18,7 +18,7 @@
 
 package plugins.fab.trackmanager;
 
-import icy.util.Random;
+import org.bioimageanalysis.icy.common.math.Random;
 import plugins.nchenouard.spot.Detection;
 
 import java.lang.ref.Reference;
@@ -206,7 +206,7 @@ public class TrackSegment implements Cloneable {
      * Add a detection in the segmentTrack
      */
     public void addDetection(final Detection detection) {
-        if (detectionList.size() > 0) {
+        if (!detectionList.isEmpty()) {
             final Detection detectionPrevious = getLastDetection();
             if (detection.getT() != detectionPrevious.getT() + 1) {
                 System.err.println(
@@ -316,10 +316,10 @@ public class TrackSegment implements Cloneable {
      * return last detection ( should be last in time too )
      */
     public Detection getLastDetection() {
-        if (detectionList.size() == 0)
+        if (detectionList.isEmpty())
             return null;
 
-        return detectionList.get(detectionList.size() - 1);
+        return detectionList.getLast();
     }
 
     /**
