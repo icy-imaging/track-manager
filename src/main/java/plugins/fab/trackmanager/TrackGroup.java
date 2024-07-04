@@ -19,6 +19,9 @@
 package plugins.fab.trackmanager;
 
 import org.bioimageanalysis.icy.model.sequence.Sequence;
+import org.bioimageanalysis.icy.system.logging.IcyLogger;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import plugins.nchenouard.spot.Detection;
 
 import java.util.ArrayList;
@@ -30,6 +33,7 @@ public class TrackGroup {
      */
     private final ArrayList<TrackSegment> trackSegmentList;
 
+    @Contract(pure = true)
     public TrackGroup(final Sequence sequence) {
         this.sequence = sequence;
         trackSegmentList = new ArrayList<>();
@@ -46,9 +50,9 @@ public class TrackGroup {
         return trackSegmentList;
     }
 
-    public void addTrackSegment(final TrackSegment ts) {
+    public void addTrackSegment(final @NotNull TrackSegment ts) {
         if (ts.getOwnerTrackGroup() != null) {
-            System.err.println("The trackSegment is already owned by another TrackGroup.");
+            IcyLogger.warn(this.getClass(), "The trackSegment is already owned by another TrackGroup.");
             return;
         }
 
@@ -77,7 +81,7 @@ public class TrackGroup {
         }
     }
 
-    public void removeTrackSegment(final TrackSegment ts) {
+    public void removeTrackSegment(final @NotNull TrackSegment ts) {
         // should remove links
         ts.setOwnerTrackGroup(null);
         ts.removeAllLinks();
@@ -98,5 +102,4 @@ public class TrackGroup {
     public String toString() {
         return description;
     }
-
 }

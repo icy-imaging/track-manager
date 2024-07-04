@@ -21,8 +21,7 @@ package plugins.fab.trackmanager.blocks;
 import org.bioimageanalysis.icy.extension.plugin.abstract_.Plugin;
 import org.bioimageanalysis.icy.extension.plugin.annotation_.IcyPluginIcon;
 import org.bioimageanalysis.icy.extension.plugin.annotation_.IcyPluginName;
-import org.bioimageanalysis.icy.extension.plugin.interface_.PluginBundled;
-import org.bioimageanalysis.icy.extension.plugin.interface_.PluginLibrary;
+import org.jetbrains.annotations.NotNull;
 import plugins.adufour.blocks.tools.roi.ROIBlock;
 import plugins.adufour.blocks.util.VarList;
 import plugins.adufour.vars.lang.Var;
@@ -37,14 +36,14 @@ import java.util.List;
 /**
  * Block to load a set of ROI from a file
  *
- * @author Stephane
+ * @author Stephane Dallongeville
  */
 @IcyPluginName("Load Tracks From XML")
 @IcyPluginIcon(path = "/track-manager.png")
-public class LoadTracksFromXML extends Plugin implements ROIBlock, PluginLibrary, PluginBundled {
+public class LoadTracksFromXML extends Plugin implements ROIBlock {
     final VarMutable file = new VarMutable("XML file", null) {
         @Override
-        public boolean isAssignableFrom(final Var source) {
+        public boolean isAssignableFrom(final @NotNull Var source) {
             return (String.class == source.getType()) || (File.class == source.getType());
         }
     };
@@ -71,19 +70,14 @@ public class LoadTracksFromXML extends Plugin implements ROIBlock, PluginLibrary
     }
 
     @Override
-    public void declareInput(final VarList inputMap) {
+    public void declareInput(final @NotNull VarList inputMap) {
         inputMap.add("file", file);
         inputMap.add("groupIndex", groupIndex);
     }
 
     @Override
-    public void declareOutput(final VarList outputMap) {
+    public void declareOutput(final @NotNull VarList outputMap) {
         outputMap.add("tracks", tracks);
 
-    }
-
-    @Override
-    public String getMainPluginClassName() {
-        return TrackManager.class.getName();
     }
 }

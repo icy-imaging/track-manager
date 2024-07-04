@@ -26,6 +26,8 @@ import org.bioimageanalysis.icy.gui.canvas.IcyCanvas;
 import org.bioimageanalysis.icy.model.overlay.Overlay;
 import org.bioimageanalysis.icy.model.sequence.Sequence;
 import org.bioimageanalysis.icy.model.swimmingPool.SwimmingObject;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import plugins.nchenouard.spot.Detection;
 
 import java.awt.*;
@@ -68,7 +70,7 @@ public class TrackManagerPainter extends Overlay {
     }
 
     @Override
-    public void mouseClick(final MouseEvent e, /*Point2D p*/ final Point5D.Double imagePoint, final IcyCanvas icyCanvas) {
+    public void mouseClick(final @NotNull MouseEvent e, final Point5D.Double imagePoint, final IcyCanvas icyCanvas) {
         if (e.isConsumed())
             return;
 
@@ -309,7 +311,6 @@ public class TrackManagerPainter extends Overlay {
 
     @Override
     public void paint(final Graphics2D g, final Sequence sequence, final IcyCanvas canvas) {
-
         // System.out.println("TP");
 
         if (trackPool != null) {
@@ -511,6 +512,7 @@ public class TrackManagerPainter extends Overlay {
         final Detection start;
         final Detection end;
 
+        @Contract(pure = true)
         public TrackLineSection(final Detection start, final Detection end) {
             super();
 
@@ -518,7 +520,8 @@ public class TrackManagerPainter extends Overlay {
             this.end = end;
         }
 
-        public Line2D getLine2D(final Line2D line) {
+        @Contract("_ -> param1")
+        public @NotNull Line2D getLine2D(final @NotNull Line2D line) {
             line.setLine(start.getX(), start.getY(), end.getX(), end.getY());
             return line;
         }
@@ -527,7 +530,8 @@ public class TrackManagerPainter extends Overlay {
             return start.getColor();
         }
 
-        public Rectangle2D getBounds(final Rectangle2D bounds, final float stroke) {
+        @Contract("_, _ -> param1")
+        public @NotNull Rectangle2D getBounds(final @NotNull Rectangle2D bounds, final float stroke) {
             bounds.setFrameFromDiagonal(start.getX(), start.getY(), end.getX(), end.getY());
             ShapeUtil.enlarge(bounds, stroke, stroke, true);
             return bounds;

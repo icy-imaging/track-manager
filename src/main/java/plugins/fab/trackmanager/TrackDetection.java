@@ -28,7 +28,7 @@ import java.awt.geom.Rectangle2D;
 /**
  * Display a single detection of a track. Used by TrackPanel / TrackEditor
  *
- * @author fab
+ * @author Fabrice de Chaumont
  */
 public class TrackDetection extends JPanel {
     private boolean Selected = false;
@@ -103,7 +103,5 @@ public class TrackDetection extends JPanel {
             g2.drawLine(0, 0, getWidth(), getHeight());
             g2.setStroke(new BasicStroke(1));
         }
-
     }
-
 }

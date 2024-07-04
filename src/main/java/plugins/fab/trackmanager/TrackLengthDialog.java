@@ -20,21 +20,20 @@ package plugins.fab.trackmanager;
 
 import org.bioimageanalysis.icy.gui.GuiUtil;
 import org.bioimageanalysis.icy.gui.dialog.ActionDialog;
+import org.bioimageanalysis.icy.system.logging.IcyLogger;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class TrackLengthDialog implements ActionListener {
-
     JTextField textField = new JTextField("3-10");
     TrackPool trackPool;
 
     public TrackLengthDialog(final TrackPool trackPool) {
         this.trackPool = trackPool;
         final ActionDialog actionDialog = new ActionDialog("Select by length");
-        actionDialog.getContentPane().setLayout(
-                new BoxLayout(actionDialog.getContentPane(), BoxLayout.PAGE_AXIS));
+        actionDialog.getContentPane().setLayout(new BoxLayout(actionDialog.getContentPane(), BoxLayout.PAGE_AXIS));
 
         actionDialog.getContentPane().add(GuiUtil.createLineBoxPanel(new JLabel("Use the syntax: from-to (in number of frame):")));
         actionDialog.getContentPane().add(GuiUtil.createLineBoxPanel(textField));
@@ -44,13 +43,10 @@ public class TrackLengthDialog implements ActionListener {
 
         actionDialog.setOkAction(this);
         actionDialog.setVisible(true);
-
-
     }
 
     @Override
     public void actionPerformed(final ActionEvent e) {
-
         final String text = textField.getText();
 
         final String[] values = text.split("-");
@@ -69,11 +65,8 @@ public class TrackLengthDialog implements ActionListener {
             highVal = Integer.MAX_VALUE;
         }
 
-        System.out.println("low val : " + lowVal);
-        System.out.println("high val : " + highVal);
+        IcyLogger.debug(this.getClass(), "low val : " + lowVal, "high val : " + highVal);
 
         trackPool.selectTracksByLength(lowVal, highVal);
-
-
     }
 }

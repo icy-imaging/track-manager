@@ -21,6 +21,8 @@ package plugins.fab.trackmanager;
 import org.bioimageanalysis.icy.extension.plugin.abstract_.Plugin;
 import org.bioimageanalysis.icy.gui.GuiUtil;
 import org.bioimageanalysis.icy.gui.component.panel.PopupPanel;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -47,8 +49,14 @@ public abstract class PluginTrackManagerProcessor extends Plugin {
         enabledCheckBox.setSelected(true);
         enabledCheckBox.addActionListener(actionButton);
 
-        final JPanel commandPanel = GuiUtil.createLineBoxPanel(enabledCheckBox, Box.createHorizontalGlue(), performanceLabel,
-                moveUpButton, moveDownButton, closeButton);
+        final JPanel commandPanel = GuiUtil.createLineBoxPanel(
+                enabledCheckBox,
+                Box.createHorizontalGlue(),
+                performanceLabel,
+                moveUpButton,
+                moveDownButton,
+                closeButton
+        );
 
         closeButton.addActionListener(actionButton);
         closeButton.setToolTipText("Close processor");
@@ -75,7 +83,7 @@ public abstract class PluginTrackManagerProcessor extends Plugin {
 
     class ActionButton implements ActionListener {
         @Override
-        public void actionPerformed(final ActionEvent e) {
+        public void actionPerformed(final @NotNull ActionEvent e) {
 
             if (e.getSource() == closeButton) {
                 Close();
@@ -128,6 +136,8 @@ public abstract class PluginTrackManagerProcessor extends Plugin {
         super.finalize();
     }*/
 
+    @SuppressWarnings("UnstableApiUsage")
+    @Contract(mutates = "this")
     public final void setTrackPool(final TrackPool trackPool) {
         this.trackPool = trackPool;
     }

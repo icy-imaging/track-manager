@@ -22,8 +22,7 @@ import org.bioimageanalysis.icy.common.collection.CollectionUtil;
 import org.bioimageanalysis.icy.extension.plugin.abstract_.Plugin;
 import org.bioimageanalysis.icy.extension.plugin.annotation_.IcyPluginIcon;
 import org.bioimageanalysis.icy.extension.plugin.annotation_.IcyPluginName;
-import org.bioimageanalysis.icy.extension.plugin.interface_.PluginBundled;
-import org.bioimageanalysis.icy.extension.plugin.interface_.PluginLibrary;
+import org.jetbrains.annotations.NotNull;
 import plugins.adufour.blocks.tools.roi.ROIBlock;
 import plugins.adufour.blocks.util.VarList;
 import plugins.adufour.vars.lang.Var;
@@ -36,15 +35,15 @@ import java.io.File;
 /**
  * Block to save a set of ROI to a file
  *
- * @author Stephane
+ * @author Stephane Dallongeville
  */
 @IcyPluginName("Save Tracks To XML")
 @IcyPluginIcon(path = "/track-manager.png")
-public class SaveTracksToXML extends Plugin implements ROIBlock, PluginLibrary, PluginBundled {
+public class SaveTracksToXML extends Plugin implements ROIBlock {
     final Var<TrackGroup> tracks = new Var<>("Track group", new TrackGroup(null));
     final VarMutable file = new VarMutable("XML file", null) {
         @Override
-        public boolean isAssignableFrom(final Var source) {
+        public boolean isAssignableFrom(final @NotNull Var source) {
             return (String.class == source.getType()) || (File.class == source.getType());
         }
     };
@@ -72,7 +71,7 @@ public class SaveTracksToXML extends Plugin implements ROIBlock, PluginLibrary, 
     }
 
     @Override
-    public void declareInput(final VarList inputMap) {
+    public void declareInput(final @NotNull VarList inputMap) {
         inputMap.add("tracks", tracks);
         inputMap.add("file", file);
     }
@@ -80,10 +79,5 @@ public class SaveTracksToXML extends Plugin implements ROIBlock, PluginLibrary, 
     @Override
     public void declareOutput(final VarList outputMap) {
         //
-    }
-
-    @Override
-    public String getMainPluginClassName() {
-        return TrackManager.class.getName();
     }
 }

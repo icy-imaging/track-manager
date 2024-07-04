@@ -23,6 +23,9 @@ import org.bioimageanalysis.icy.gui.dialog.MessageDialog;
 import org.bioimageanalysis.icy.gui.frame.progress.AnnounceFrame;
 import org.bioimageanalysis.icy.model.sequence.Sequence;
 import org.bioimageanalysis.icy.model.swimmingPool.SwimmingObject;
+import org.bioimageanalysis.icy.system.logging.IcyLogger;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import plugins.nchenouard.spot.Detection;
 
 import javax.swing.event.ChangeEvent;
@@ -35,9 +38,7 @@ import java.util.List;
  *
  * @author Fabrice de Chaumont
  */
-
 public class TrackPool {
-
     private final TrackManagerPainter tePainter;
 
     private final ArrayList<PluginTrackManagerProcessor> trackManagerProcessorList = new ArrayList<>();
@@ -79,7 +80,8 @@ public class TrackPool {
         fireTrackEditorProcessorChange();
     }
 
-    public static boolean linkExists(final List<Link> links, final TrackSegment start, final TrackSegment end) {
+    @Contract(pure = true)
+    public static boolean linkExists(final @NotNull List<Link> links, final TrackSegment start, final TrackSegment end) {
         // check if the link already exists
         for (final Link link : links)
             if ((link.start == start) && (link.end == end))
@@ -144,7 +146,7 @@ public class TrackPool {
                 final ArrayList<TrackSegment> returnList = splitTrackSegment(segmentStart,
                         segmentStart.getDetectionIndex(detectionStart), true);
                 // should render 2 segments. The first is the one we want. We take the last detection of the first tracksegment.
-                detectionStart = returnList.get(0).getLastDetection();
+                detectionStart = returnList.getFirst().getLastDetection();
                 segmentStart = getTrackSegmentWithDetection(detectionStart);
             }
 
@@ -257,7 +259,6 @@ public class TrackPool {
      * Creates a virtual track
      */
     public void createVirtualTrackWith2TrackDetection(final Detection detectionStart, final Detection detectionEnd) {
-
         // check if both sides of the link are TrackDetectionComponents.
         if (detectionStart == null)
             return;
@@ -333,7 +334,7 @@ public class TrackPool {
     /**
      * @return null if no trackgroup contains the tracksegment
      */
-    public TrackGroup getTrackGroupContainingSegment(final TrackSegment ts) {
+    public TrackGroup getTrackGroupContainingSegment(final @NotNull TrackSegment ts) {
         return ts.getOwnerTrackGroup();
 
     }
@@ -345,8 +346,7 @@ public class TrackPool {
 
         final TrackGroup trackGroup = getTrackGroupContainingSegment(ts);
         if (trackGroup == null) {
-            System.out.println(
-                    "Can't delete The track segment " + ts + " Reason: it is not in any trackGroup");
+            IcyLogger.warn(this.getClass(), "Can't delete The track segment " + ts + " Reason: it is not in any trackGroup.");
             return;
         }
         trackGroup.getTrackSegmentList().remove(ts);
@@ -407,10 +407,10 @@ public class TrackPool {
             for (final TrackSegment ts : trackSegmentListClone) {
                 // System.out.println("Computing trackSegment # " + trackSegmentListClone.indexOf( ts ) );
                 if (ts.nextList.size() == 1) // if the track has only one successor.
-                    if (ts.nextList.get(0).previousList.size() == 1) // If successor has only one predecessor.
+                    if (ts.nextList.getFirst().previousList.size() == 1) // If successor has only one predecessor.
                     {
                         // System.out.println("Fusing...");
-                        fuseTrack(ts, ts.nextList.get(0)); // fuse tracks.
+                        fuseTrack(ts, ts.nextList.getFirst()); // fuse tracks.
                         fuseOperationPerformed = true;
                         break;
                     }
@@ -423,7 +423,7 @@ public class TrackPool {
     /**
      * Fusing 2 tracks ts1 is one step before ts2.
      */
-    public void fuseTrack(final TrackSegment ts1, final TrackSegment ts2) {
+    public void fuseTrack(final TrackSegment ts1, final @NotNull TrackSegment ts2) {
         // System.out.println("debug fuse track: fusing ");
         // System.out.println("ts1 = " + ts1);
         // System.out.println("ts2 = " + ts2);
@@ -438,7 +438,7 @@ public class TrackPool {
 
         // ts1.getDetectionList().addAll(ts2.getDetectionList());
 
-        while (ts2.getDetectionList().size() > 0) {
+        while (!ts2.getDetectionList().isEmpty()) {
             final Detection detection = ts2.getFirstDetection();
             ts2.removeDetection(detection);
             // System.out.println("Remove 1 detection to ts2. t=" + detection.getT() );
@@ -461,7 +461,7 @@ public class TrackPool {
     /**
      * return distance between 2 detections
      */
-    public double getDistance(final Detection d1, final Detection d2) {
+    public double getDistance(final @NotNull Detection d1, final @NotNull Detection d2) {
         return getDistance(d1.getX(), d1.getY(), d1.getZ(), d2.getX(), d2.getY(), d2.getZ());
     }
 
@@ -493,7 +493,7 @@ public class TrackPool {
         return linkarray;
     }
 
-    public static List<Link> getLinks(final List<TrackGroup> groups) {
+    public static @NotNull List<Link> getLinks(final List<TrackGroup> groups) {
         final List<Link> result = new ArrayList<>();
         final List<TrackSegment> segments = getTrackSegmentList(groups);
 
@@ -551,7 +551,7 @@ public class TrackPool {
     /**
      * @return the pool of tracksegment of all the trackgroup
      */
-    public static List<TrackSegment> getTrackSegmentList(final List<TrackGroup> groups) {
+    public static @NotNull List<TrackSegment> getTrackSegmentList(final @NotNull List<TrackGroup> groups) {
         final List<TrackSegment> result = new ArrayList<>();
 
         for (final TrackGroup group : groups)
@@ -564,7 +564,6 @@ public class TrackPool {
      * @return the pool of tracksegment of all the trackgroup
      */
     public ArrayList<TrackSegment> getTrackSegmentList() {
-
         final ArrayList<TrackSegment> trackSegmentList = new ArrayList<>();
         for (final TrackGroup group : getTrackGroupList()) {
             trackSegmentList.addAll(group.getTrackSegmentList());
@@ -577,7 +576,6 @@ public class TrackPool {
      * find the tracksegment containing the given detection
      */
     public TrackSegment getTrackSegmentWithDetection(final Detection detection) {
-
         final ArrayList<TrackSegment> trackSegmentList = getTrackSegmentList();
 
         for (final TrackSegment ts : trackSegmentList) {
@@ -589,14 +587,13 @@ public class TrackPool {
     }
 
     // FIXME: 05/04/2023 does nothing
-    public static ArrayList<TrackSegment> loadTracks(final File f) {
-
+    public static @NotNull ArrayList<TrackSegment> loadTracks(final File f) {
         final ArrayList<TrackSegment> inputTrackSegmentList = new ArrayList<>();
         final ArrayList<TrackSegment> targetTrackSegmentList = new ArrayList<>();
 
         for (final TrackSegment ts : inputTrackSegmentList) {
             if (ts.getFirstDetection() == null || ts.getLastDetection() == null) {
-                System.out.println("Warning, found and removed empty track segment");
+                IcyLogger.warn(TrackPool.class, "Warning, found and removed empty track segment");
                 continue;
             }
 
@@ -610,7 +607,7 @@ public class TrackPool {
             }
 
             if (skipTrackSegment) {
-                System.out.println("Warning, found and removed empty track segment");
+                IcyLogger.warn(TrackPool.class, "Warning, found and removed empty track segment");
                 continue;
             }
 
@@ -628,7 +625,7 @@ public class TrackPool {
     /**
      * remove a link between 2 track segment.
      */
-    public void removeLink(final TrackSegment start, final TrackSegment end) {
+    public void removeLink(final @NotNull TrackSegment start, final TrackSegment end) {
         // int nb = 0;
         // while ( start.nextList.contains( end ) )
         // {
@@ -668,14 +665,12 @@ public class TrackPool {
     }
 
     public void selectTracksByLength(final int lowVal, final int highVal) {
-
         for (final TrackSegment ts : getTrackSegmentList()) {
             if (ts.getDetectionList().size() >= lowVal && ts.getDetectionList().size() <= highVal) {
                 ts.setAllDetectionSelected(true);
             }
         }
         fireTrackEditorProcessorChange();
-
     }
 
     public void unselectAllTracks() {
@@ -773,11 +768,9 @@ public class TrackPool {
         trackSegmentReturnList.add(ts1);
         trackSegmentReturnList.add(ts2);
         return trackSegmentReturnList;
-
     }
 
     public ArrayList<TrackGroup> getTrackGroupList() {
-
         final ArrayList<TrackGroup> trackGroupList = new ArrayList<>();
 
         for (final SwimmingObject result : resultList)
@@ -791,7 +784,7 @@ public class TrackPool {
      */
     ArrayList<SwimmingObject> resultList = new ArrayList<>();
 
-    public void addResult(final SwimmingObject result) {
+    public void addResult(final @NotNull SwimmingObject result) {
         if (!(result.getObject() instanceof TrackGroup)) {
             // System.out.println("Object " + result + " is not recognized as a TrackGroup.");
             return;
@@ -807,9 +800,7 @@ public class TrackPool {
 
         resultList.remove(result);
 
-        if (result.getObject() instanceof TrackGroup) {
-            final TrackGroup tg = (TrackGroup) result.getObject();
-
+        if (result.getObject() instanceof final TrackGroup tg) {
             // remove track segment from hash map
             for (final TrackSegment ts : tg.getTrackSegmentList())
                 ts.removeId();
@@ -820,27 +811,22 @@ public class TrackPool {
      * removes the painter from all sequences.
      */
     public void removePainter() {
-
         // System.out.println("remove painter");
 
         final List<Sequence> sequenceList = Icy.getMainInterface().getSequencesContaining(tePainter);
         for (final Sequence sequence : sequenceList) {
             sequence.removeOverlay(tePainter);
         }
-
     }
 
     public int getTrackIndex(final TrackSegment ts) {
-
         return getTrackSegmentList().indexOf(ts);
-
     }
 
     /**
      * @return the timepoint corresponding to the last detection of all the trackgroup.
      */
     public int getLastDetectionTimePoint() {
-
         int maxT = 0;
         for (final TrackGroup tg : getTrackGroupList()) {
             for (final TrackSegment ts : tg.getTrackSegmentList()) {

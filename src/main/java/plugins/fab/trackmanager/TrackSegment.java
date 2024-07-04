@@ -19,6 +19,7 @@
 package plugins.fab.trackmanager;
 
 import org.bioimageanalysis.icy.common.math.Random;
+import org.bioimageanalysis.icy.system.logging.IcyLogger;
 import plugins.nchenouard.spot.Detection;
 
 import java.lang.ref.Reference;
@@ -32,9 +33,8 @@ import java.util.Map;
  * TrackSegment is a pool of consecutive detection.
  *
  * @author Fabrice de Chaumont
- * @author Stephane
+ * @author Stephane Dallongeville
  */
-
 public class TrackSegment implements Cloneable {
     // better to use weak reference in the map 
     protected final static Map<Integer, Reference<TrackSegment>> idKeyHashMapList = new HashMap<>(); // 1-1 hashmap.
@@ -145,7 +145,7 @@ public class TrackSegment implements Cloneable {
                 this.id = key;
             }
             else
-                System.out.println("track id already loaded");
+                IcyLogger.warn(this.getClass(), "Track ID already loaded.");
         }
     }
 
@@ -209,8 +209,7 @@ public class TrackSegment implements Cloneable {
         if (!detectionList.isEmpty()) {
             final Detection detectionPrevious = getLastDetection();
             if (detection.getT() != detectionPrevious.getT() + 1) {
-                System.err.println(
-                        "TrackSegment : The detection must be added with consecutive T value. Detection was not added");
+                IcyLogger.warn(this.getClass(), "TrackSegment : The detection must be added with consecutive T value. Detection was not added.");
                 // throw new IllegalArgumentException();
                 return;
             }
@@ -275,10 +274,10 @@ public class TrackSegment implements Cloneable {
      * return first detection ( should be first in time too )
      */
     public Detection getFirstDetection() {
-        if (detectionList.size() == 0)
+        if (detectionList.isEmpty())
             return null;
 
-        return detectionList.get(0);
+        return detectionList.getFirst();
     }
 
     /**

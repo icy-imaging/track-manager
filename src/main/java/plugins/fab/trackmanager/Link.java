@@ -18,12 +18,14 @@
 
 package plugins.fab.trackmanager;
 
+import org.jetbrains.annotations.Contract;
 import plugins.nchenouard.spot.Detection;
 
 public class Link {
     TrackSegment start;
     TrackSegment end;
 
+    @Contract(pure = true)
     public Link(final TrackSegment start, final TrackSegment end) {
         this.start = start;
         this.end = end;
@@ -49,5 +51,4 @@ public class Link {
     public String toString() {
         return "link start:" + getStartDetection() + " end:" + getEndDetection();
     }
-
 }
