@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2023. Institut Pasteur.
+ * Copyright (c) 2010-2024. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -130,18 +130,10 @@ public abstract class PluginTrackManagerProcessor extends Plugin {
         return mainPanel;
     }
 
-    /*@Override
-    protected void finalize() throws Throwable {
-        trackPool = null;
-        super.finalize();
-    }*/
-
-    @SuppressWarnings("UnstableApiUsage")
     @Contract(mutates = "this")
     public final void setTrackPool(final TrackPool trackPool) {
         this.trackPool = trackPool;
     }
 
     abstract public void displaySequenceChanged();
-
 }

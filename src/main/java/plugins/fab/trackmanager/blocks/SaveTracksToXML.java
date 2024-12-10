@@ -38,7 +38,7 @@ import java.io.File;
  * @author Stephane Dallongeville
  */
 @IcyPluginName("Save Tracks To XML")
-@IcyPluginIcon(path = "/track-manager.png")
+@IcyPluginIcon(path = "/plugins/fab/trackmanager/track-manager.png")
 public class SaveTracksToXML extends Plugin implements ROIBlock {
     final Var<TrackGroup> tracks = new Var<>("Track group", new TrackGroup(null));
     final VarMutable file = new VarMutable("XML file", null) {

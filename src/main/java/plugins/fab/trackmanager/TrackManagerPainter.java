@@ -496,7 +496,8 @@ public class TrackManagerPainter extends Overlay {
     //
     // if ( StringUtil.equals(metadataName, Sequence.ID_PIXEL_SIZE_Z ))
     // {
-    //// adjustZScaling( getSequence().getPixelSizeZ() );
+
+    // adjustZScaling( getSequence().getPixelSizeZ() );
     // }
     //
     // break;
@@ -508,18 +509,7 @@ public class TrackManagerPainter extends Overlay {
     // {
     // }
 
-    private static class TrackLineSection {
-        final Detection start;
-        final Detection end;
-
-        @Contract(pure = true)
-        public TrackLineSection(final Detection start, final Detection end) {
-            super();
-
-            this.start = start;
-            this.end = end;
-        }
-
+    private record TrackLineSection(Detection start, Detection end) {
         @Contract("_ -> param1")
         public @NotNull Line2D getLine2D(final @NotNull Line2D line) {
             line.setLine(start.getX(), start.getY(), end.getX(), end.getY());

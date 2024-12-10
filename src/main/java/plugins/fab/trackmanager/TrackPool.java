@@ -116,19 +116,17 @@ public class TrackPool {
      * Creates a virtual track
      */
     public void createVirtualTrackWith2Detection(Detection detectionStart, Detection detectionEnd) {
-
         TrackSegment segmentStart = getTrackSegmentWithDetection(detectionStart);
         TrackSegment segmentEnd = getTrackSegmentWithDetection(detectionEnd);
 
         if (segmentStart == segmentEnd) {
-            MessageDialog.showDialog("Can't link 2 detections belonging to the same track.",
-                    MessageDialog.INFORMATION_MESSAGE);
+            MessageDialog.showDialog("Can't link 2 detections belonging to the same track.", MessageDialog.INFORMATION_MESSAGE);
             return;
         }
 
-        if (segmentStart.getOwnerTrackGroup() != segmentStart.getOwnerTrackGroup()) {
-            MessageDialog.showDialog("The two tracks should be from the same track group.",
-                    MessageDialog.INFORMATION_MESSAGE);
+        //if (segmentStart.getOwnerTrackGroup() != segmentStart.getOwnerTrackGroup()) { // TODO I think it's an error
+        if (segmentStart.getOwnerTrackGroup() != segmentEnd.getOwnerTrackGroup()) {
+            MessageDialog.showDialog("The two tracks should be from the same track group.", MessageDialog.INFORMATION_MESSAGE);
             return;
         }
 
@@ -143,8 +141,7 @@ public class TrackPool {
                 // The detection is not the last of the track.
                 // Must split the start track.
 
-                final ArrayList<TrackSegment> returnList = splitTrackSegment(segmentStart,
-                        segmentStart.getDetectionIndex(detectionStart), true);
+                final ArrayList<TrackSegment> returnList = splitTrackSegment(segmentStart, segmentStart.getDetectionIndex(detectionStart), true);
                 // should render 2 segments. The first is the one we want. We take the last detection of the first tracksegment.
                 detectionStart = returnList.getFirst().getLastDetection();
                 segmentStart = getTrackSegmentWithDetection(detectionStart);
@@ -154,8 +151,7 @@ public class TrackPool {
                 // The detection is not the first of the track.
                 // Must split the end track.
 
-                final ArrayList<TrackSegment> returnList = splitTrackSegment(segmentEnd,
-                        segmentEnd.getDetectionIndex(detectionEnd) - 1, true);
+                final ArrayList<TrackSegment> returnList = splitTrackSegment(segmentEnd, segmentEnd.getDetectionIndex(detectionEnd) - 1, true);
                 // should render 2 segments. The second is the one we want. We take the first detection of the second tracksegment.
                 detectionEnd = returnList.get(1).getFirstDetection();
                 segmentEnd = getTrackSegmentWithDetection(detectionEnd);

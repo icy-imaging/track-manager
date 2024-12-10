@@ -63,7 +63,6 @@ public class TrackGroup {
     }
 
     public TrackSegment getTrackSegmentWithDetection(final Detection detection) {
-
         final ArrayList<TrackSegment> trackSegmentList = getTrackSegmentList();
 
         for (final TrackSegment ts : trackSegmentList) {

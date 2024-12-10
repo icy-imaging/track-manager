@@ -39,7 +39,7 @@ import java.util.List;
  * @author Stephane Dallongeville
  */
 @IcyPluginName("Load Tracks From XML")
-@IcyPluginIcon(path = "/track-manager.png")
+@IcyPluginIcon(path = "/plugins/fab/trackmanager/track-manager.png")
 public class LoadTracksFromXML extends Plugin implements ROIBlock {
     final VarMutable file = new VarMutable("XML file", null) {
         @Override
@@ -78,6 +78,5 @@ public class LoadTracksFromXML extends Plugin implements ROIBlock {
     @Override
     public void declareOutput(final @NotNull VarList outputMap) {
         outputMap.add("tracks", tracks);
-
     }
 }

@@ -67,13 +67,8 @@ import java.util.prefs.Preferences;
  * @author Fabrice de Chaumont
  */
 @IcyPluginName("Track Manager")
-@IcyPluginIcon(path = "/track-manager.png")
+@IcyPluginIcon(path = "/plugins/fab/trackmanager/track-manager.png")
 public class TrackManager extends PluginActionable implements AdjustmentListener, ActionListener, SwimmingPoolListener, IcyFrameListener {
-    /*
-     * List of active trackEditor shared between trackeditors (not used anymore)
-     */
-    // private static ArrayList<TrackManager> trackManagerList = new ArrayList<TrackManager>();
-
     /**
      * is this track manager not used anymore (TODO:Should change to a listener structure.)
      */
@@ -124,9 +119,7 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
         trackPool.addTrackProcessor(ptep);
 
         // rebuild trackList
-
         rebuildTrackProcessorDisplay();
-
     }
 
     public TrackPool getTrackPool() {
@@ -134,7 +127,6 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
     }
 
     void rebuildTrackProcessorDisplay() {
-
         rightContentPanel.removeAll();
 
         for (final PluginTrackManagerProcessor trackProcessor : trackPool.getTrackManagerProcessorList()) {
@@ -407,7 +399,6 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
         // add the trackColor Processor
         final PluginDescriptor pd = PluginLoader.getPlugin("plugins.fab.trackmanager.processors.TrackProcessorColorTrack");
         loadTrackProcessor(pd);
-
     }
 
     /**
@@ -466,11 +457,9 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
 
         }
         // trackGroupSourceInnerPanel.updateUI();
-
     }
 
     private void initTrackPoolInnerPanel() {
-
         // trackingGroupSourceMenu.removeAll();
 
         // trackGroupSourceInnerPanel.removeAll();
@@ -503,7 +492,6 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
 
             }
         }
-
     }
 
 //    /**
@@ -538,7 +526,7 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
     // }
     // }
 
-    ///** List of sequences which will be kept synchronize while the t cursor are moving. */
+    //** List of sequences which will be kept synchronize while the t cursor are moving. */
     // private ArrayList<Sequence> sequenceToKeepSynchronizeInT = new ArrayList<Sequence>();
 
     /**
@@ -567,7 +555,7 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
         // System.out.println("Synchro sequence");
         // for (Sequence sequence : sequenceToKeepSynchronizeInT)
         // {
-        //// System.out.println("synchro on sequence : " + sequence );
+        // System.out.println("synchro on sequence : " + sequence );
         // sequence.setT(currentT);
         // }
 
@@ -582,7 +570,6 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
     }
 
     class CheckBoxResultSource extends JCheckBoxMenuItem implements ActionListener {
-
         // JCheckBox checkBox = new JCheckBox();
         // JToggleButton trackTimeOnSequenceButton = new JToggleButton("T");
         SwimmingObject result;
@@ -630,7 +617,6 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
             // }
             // }
             // ----------
-
         }
 
         // public void setSelected(boolean b) {
@@ -642,7 +628,7 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
             // remove the sequence tracked
             // if (trackTimeOnSequenceButton.isSelected())
             // {
-            //// sequenceToKeepSynchronizeInT.remove(sequence);
+            // sequenceToKeepSynchronizeInT.remove(sequence);
             // }
             trackingGroupSourceMenu.remove(this);
             // trackGroupSourceInnerPanel.remove(this);
@@ -657,12 +643,12 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
             // {
             // if (trackTimeOnSequenceButton.isSelected())
             // {
-            //// if (sequence != null)
-            //// sequenceToKeepSynchronizeInT.add(sequence);
+            // if (sequence != null)
+            // sequenceToKeepSynchronizeInT.add(sequence);
             // }
             // else
             // {
-            //// sequenceToKeepSynchronizeInT.remove(sequence);
+            // sequenceToKeepSynchronizeInT.remove(sequence);
             // }
             // reSynchroTSequence();
             // }
@@ -678,7 +664,7 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
                     // if (trackEditor != TrackManager.this)
                     // {
                     // // System.out.println("call ok");
-                    //// trackEditor.setEnableCheckBoxResultSource(result, false);
+                    // trackEditor.setEnableCheckBoxResultSource(result, false);
                     // }
                     // }
 
@@ -688,8 +674,8 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
                     // trackPool.getDisplaySequence().painterChanged( null );
                     // for (TrackManager trackEditor : trackManagerList)
                     // {
-                    //// if (trackEditor != TrackManager.this)
-                    //// trackEditor.setEnableCheckBoxResultSource(result, true);
+                    // if (trackEditor != TrackManager.this)
+                    // trackEditor.setEnableCheckBoxResultSource(result, true);
                     // }
 
                 }
@@ -1129,7 +1115,7 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
             int newX = (int) trackPanel.getDetectDim().getWidth() - 5;
             if (newX <= 0)
                 newX = 5;
-            trackPanel.setDetectDim(new Dimension(newX, newX));
+            trackPanel.setDetectDim(new Dimension(newX, newX)); // TODO check if 'newX' should be used as 'Y' argument
             trackPool.fireTrackEditorProcessorChange();
         }
         if (e.getSource() == zoomMoreButton) {
@@ -1151,7 +1137,6 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
         // .getDetectDim().getHeight() + 5));
         // trackPool.fireTrackEditorProcessorChange();
         // }
-
     }
 
     @Override
@@ -1179,7 +1164,6 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
                     menuItem.addActionListener(new MenuItemActionListener(plugin, PluginTrackManagerProcessor.class));
                 }
         }
-
     }
 
     public void moveTrackProcessor(final PluginTrackManagerProcessor trackEditorProcessor, final int i) {
@@ -1201,7 +1185,6 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
         trackPool.fireTrackEditorProcessorChange();
 
         // System.out.println("Demande changement de place.");
-
     }
 
     @Override
@@ -1291,11 +1274,10 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
 
     public void setDisplaySequence(final Sequence sequence) {
         sequenceSelector.setSelectedSequence(sequence);
-
     }
 
     @Override
     public void run() {
-
+        //
     }
 }

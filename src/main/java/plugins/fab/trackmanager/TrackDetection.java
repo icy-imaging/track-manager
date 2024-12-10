@@ -37,11 +37,6 @@ public class TrackDetection extends JPanel {
     public TrackDetection(final Detection detection) {
         super();
         this.detection = detection;
-        // if ( detection.getDetectionType() == Detection.DETECTIONTYPE_REAL_DETECTION ) color =
-        // Color.blue;
-        // if ( detection.getDetectionType() == Detection.DETECTIONTYPE_VIRTUAL_DETECTION ) color =
-        // Color.orange;
-
     }
 
     public Detection getDetection() {
