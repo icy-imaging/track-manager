@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2025. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -19,10 +19,9 @@
 package plugins.fab.trackmanager;
 
 import org.bioimageanalysis.icy.Icy;
+import org.bioimageanalysis.icy.extension.ExtensionLoader;
 import org.bioimageanalysis.icy.extension.plugin.PluginDescriptor;
-import org.bioimageanalysis.icy.extension.plugin.PluginLoader;
 import org.bioimageanalysis.icy.extension.plugin.abstract_.PluginActionable;
-import org.bioimageanalysis.icy.extension.plugin.annotation_.IcyPluginIcon;
 import org.bioimageanalysis.icy.extension.plugin.annotation_.IcyPluginName;
 import org.bioimageanalysis.icy.gui.GuiUtil;
 import org.bioimageanalysis.icy.gui.component.ComponentUtil;
@@ -67,7 +66,6 @@ import java.util.prefs.Preferences;
  * @author Fabrice de Chaumont
  */
 @IcyPluginName("Track Manager")
-@IcyPluginIcon(path = "/plugins/fab/trackmanager/track-manager.png")
 public class TrackManager extends PluginActionable implements AdjustmentListener, ActionListener, SwimmingPoolListener, IcyFrameListener {
     /**
      * is this track manager not used anymore (TODO:Should change to a listener structure.)
@@ -397,7 +395,7 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
         sequenceSelector.addActionListener(this);
 
         // add the trackColor Processor
-        final PluginDescriptor pd = PluginLoader.getPlugin("plugins.fab.trackmanager.processors.TrackProcessorColorTrack");
+        final PluginDescriptor pd = ExtensionLoader.getPlugin("plugins.fab.trackmanager.processors.TrackProcessorColorTrack");
         loadTrackProcessor(pd);
     }
 
@@ -978,8 +976,10 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
      */
     public void reOrganize() {
         for (final TrackGroup trackGroup : trackPool.getTrackGroupList()) {
-            @SuppressWarnings("unchecked") final List<TrackSegment> trackSegmentList = (ArrayList<TrackSegment>) trackGroup.getTrackSegmentList().clone();
-            @SuppressWarnings("unchecked") final List<TrackSegment> trackSegmentListOrganized = (ArrayList<TrackSegment>) trackGroup.getTrackSegmentList().clone();
+            @SuppressWarnings("unchecked")
+            final List<TrackSegment> trackSegmentList = (ArrayList<TrackSegment>) trackGroup.getTrackSegmentList().clone();
+            @SuppressWarnings("unchecked")
+            final List<TrackSegment> trackSegmentListOrganized = (ArrayList<TrackSegment>) trackGroup.getTrackSegmentList().clone();
 
             final int tMax = trackPool.getLastDetectionTimePoint();
 
@@ -1153,7 +1153,7 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
             pluginPopupMenu.addSeparator();
         }
 
-        for (final PluginDescriptor plugin : PluginLoader.getPlugins()) {
+        for (final PluginDescriptor plugin : ExtensionLoader.getPlugins()) {
             if (plugin.isInstanceOf(PluginTrackManagerProcessor.class))
                 if (!plugin.isAbstract()) {
                     //final JMenuItem menuItem = new JMenuItem(plugin.getName(), new ImageIcon(plugin.getIcon().getImage().getScaledInstance(24, 24, Image.SCALE_SMOOTH)));
@@ -1211,7 +1211,8 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
 
         // close all track processors.
 
-        @SuppressWarnings("unchecked") final ArrayList<PluginTrackManagerProcessor> processorList = (ArrayList<PluginTrackManagerProcessor>) trackPool.getTrackManagerProcessorList().clone();
+        @SuppressWarnings("unchecked")
+        final ArrayList<PluginTrackManagerProcessor> processorList = (ArrayList<PluginTrackManagerProcessor>) trackPool.getTrackManagerProcessorList().clone();
         for (final PluginTrackManagerProcessor tep : processorList) {
             tep.Close();
         }

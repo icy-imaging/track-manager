@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -33,7 +33,7 @@ import java.util.Map;
  * TrackSegment is a pool of consecutive detection.
  *
  * @author Fabrice de Chaumont
- * @author Stephane Dallongeville
+ * @author Stéphane Dallongeville
  */
 public class TrackSegment implements Cloneable {
     // better to use weak reference in the map 
@@ -277,7 +277,7 @@ public class TrackSegment implements Cloneable {
         if (detectionList.isEmpty())
             return null;
 
-        return detectionList.getFirst();
+        return detectionList.get(0);
     }
 
     /**
@@ -318,7 +318,7 @@ public class TrackSegment implements Cloneable {
         if (detectionList.isEmpty())
             return null;
 
-        return detectionList.getLast();
+        return detectionList.get (detectionList.size() - 1);
     }
 
     /**

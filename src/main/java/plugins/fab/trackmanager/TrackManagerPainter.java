@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -372,7 +372,7 @@ public class TrackManagerPainter extends Overlay {
 
                         // line sections
                         if (detectionList.size() > 1) {
-                            Detection startDetection = detectionList.getFirst();
+                            Detection startDetection = detectionList.get(0);
 
                             for (int i = 1; i < ts.getDetectionList().size(); i++) {
                                 final Detection endDetection = detectionList.get(i);

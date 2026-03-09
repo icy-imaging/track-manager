@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010-2024. Institut Pasteur.
+ * Copyright (c) 2010-2026. Institut Pasteur.
  *
  * This file is part of Icy.
  * Icy is free software: you can redistribute it and/or modify
@@ -143,7 +143,7 @@ public class TrackPool {
 
                 final ArrayList<TrackSegment> returnList = splitTrackSegment(segmentStart, segmentStart.getDetectionIndex(detectionStart), true);
                 // should render 2 segments. The first is the one we want. We take the last detection of the first tracksegment.
-                detectionStart = returnList.getFirst().getLastDetection();
+                detectionStart = returnList.get(0).getLastDetection();
                 segmentStart = getTrackSegmentWithDetection(detectionStart);
             }
 
@@ -403,10 +403,10 @@ public class TrackPool {
             for (final TrackSegment ts : trackSegmentListClone) {
                 // System.out.println("Computing trackSegment # " + trackSegmentListClone.indexOf( ts ) );
                 if (ts.nextList.size() == 1) // if the track has only one successor.
-                    if (ts.nextList.getFirst().previousList.size() == 1) // If successor has only one predecessor.
+                    if (ts.nextList.get(0).previousList.size() == 1) // If successor has only one predecessor.
                     {
                         // System.out.println("Fusing...");
-                        fuseTrack(ts, ts.nextList.getFirst()); // fuse tracks.
+                        fuseTrack(ts, ts.nextList.get(0)); // fuse tracks.
                         fuseOperationPerformed = true;
                         break;
                     }
