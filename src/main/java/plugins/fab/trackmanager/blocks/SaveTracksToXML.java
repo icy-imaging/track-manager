@@ -18,9 +18,9 @@
 
 package plugins.fab.trackmanager.blocks;
 
-import org.bioimageanalysis.icy.common.collection.CollectionUtil;
-import org.bioimageanalysis.icy.extension.plugin.abstract_.Plugin;
-import org.bioimageanalysis.icy.extension.plugin.annotation_.IcyPluginName;
+import fr.icy.common.collection.CollectionUtil;
+import fr.icy.extension.plugin.abstract_.Plugin;
+import fr.icy.extension.plugin.annotation_.IcyPluginName;
 import org.jetbrains.annotations.NotNull;
 import plugins.adufour.blocks.tools.roi.ROIBlock;
 import plugins.adufour.blocks.util.VarList;

@@ -18,9 +18,9 @@
 
 package plugins.fab.trackmanager;
 
-import org.bioimageanalysis.icy.extension.plugin.abstract_.Plugin;
-import org.bioimageanalysis.icy.gui.GuiUtil;
-import org.bioimageanalysis.icy.gui.component.panel.PopupPanel;
+import fr.icy.extension.plugin.abstract_.Plugin;
+import fr.icy.gui.GuiUtil;
+import fr.icy.gui.component.panel.PopupPanel;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 

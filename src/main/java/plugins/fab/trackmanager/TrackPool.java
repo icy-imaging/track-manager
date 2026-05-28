@@ -18,12 +18,12 @@
 
 package plugins.fab.trackmanager;
 
-import org.bioimageanalysis.icy.Icy;
-import org.bioimageanalysis.icy.gui.dialog.MessageDialog;
-import org.bioimageanalysis.icy.gui.frame.progress.AnnounceFrame;
-import org.bioimageanalysis.icy.model.sequence.Sequence;
-import org.bioimageanalysis.icy.model.swimmingPool.SwimmingObject;
-import org.bioimageanalysis.icy.system.logging.IcyLogger;
+import fr.icy.Icy;
+import fr.icy.gui.dialog.MessageDialog;
+import fr.icy.gui.frame.progress.AnnounceFrame;
+import fr.icy.model.sequence.Sequence;
+import fr.icy.model.swimmingPool.SwimmingObject;
+import fr.icy.system.logging.IcyLogger;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import plugins.nchenouard.spot.Detection;

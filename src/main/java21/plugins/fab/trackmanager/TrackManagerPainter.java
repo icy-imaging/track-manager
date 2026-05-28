@@ -18,14 +18,14 @@
 
 package plugins.fab.trackmanager;
 
-import org.bioimageanalysis.icy.common.geom.point.Point5D;
-import org.bioimageanalysis.icy.common.geom.shape.ShapeUtil;
-import org.bioimageanalysis.icy.gui.GraphicsUtil;
-import org.bioimageanalysis.icy.gui.canvas.Canvas2D;
-import org.bioimageanalysis.icy.gui.canvas.IcyCanvas;
-import org.bioimageanalysis.icy.model.overlay.Overlay;
-import org.bioimageanalysis.icy.model.sequence.Sequence;
-import org.bioimageanalysis.icy.model.swimmingPool.SwimmingObject;
+import fr.icy.common.geom.point.Point5D;
+import fr.icy.common.geom.shape.ShapeUtil;
+import fr.icy.gui.GraphicsUtil;
+import fr.icy.gui.canvas.Canvas2D;
+import fr.icy.gui.canvas.IcyCanvas;
+import fr.icy.model.overlay.Overlay;
+import fr.icy.model.sequence.Sequence;
+import fr.icy.model.swimmingPool.SwimmingObject;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import plugins.nchenouard.spot.Detection;

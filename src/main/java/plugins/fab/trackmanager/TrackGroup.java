@@ -18,8 +18,8 @@
 
 package plugins.fab.trackmanager;
 
-import org.bioimageanalysis.icy.model.sequence.Sequence;
-import org.bioimageanalysis.icy.system.logging.IcyLogger;
+import fr.icy.model.sequence.Sequence;
+import fr.icy.system.logging.IcyLogger;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import plugins.nchenouard.spot.Detection;

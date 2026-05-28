@@ -18,8 +18,8 @@
 
 package plugins.fab.trackmanager;
 
-import org.bioimageanalysis.icy.common.math.Random;
-import org.bioimageanalysis.icy.system.logging.IcyLogger;
+import fr.icy.common.math.Random;
+import fr.icy.system.logging.IcyLogger;
 import plugins.nchenouard.spot.Detection;
 
 import java.lang.ref.Reference;

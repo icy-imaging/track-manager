@@ -18,9 +18,9 @@
 
 package plugins.fab.trackmanager;
 
-import org.bioimageanalysis.icy.gui.GuiUtil;
-import org.bioimageanalysis.icy.gui.dialog.ActionDialog;
-import org.bioimageanalysis.icy.system.logging.IcyLogger;
+import fr.icy.gui.GuiUtil;
+import fr.icy.gui.dialog.ActionDialog;
+import fr.icy.system.logging.IcyLogger;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
