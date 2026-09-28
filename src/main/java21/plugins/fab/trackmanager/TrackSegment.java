@@ -19,7 +19,6 @@
 package plugins.fab.trackmanager;
 
 import fr.icy.common.math.Random;
-import fr.icy.system.logging.IcyLogger;
 import plugins.nchenouard.spot.Detection;
 
 import java.lang.ref.Reference;
@@ -28,6 +27,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * TrackSegment is a pool of consecutive detection.
@@ -36,6 +37,8 @@ import java.util.Map;
  * @author Stéphane Dallongeville
  */
 public class TrackSegment implements Cloneable {
+    private static final Logger LOGGER = Logger.getLogger(TrackSegment.class.getName());
+
     // better to use weak reference in the map 
     protected final static Map<Integer, Reference<TrackSegment>> idKeyHashMapList = new HashMap<>(); // 1-1 hashmap.
 
@@ -144,8 +147,10 @@ public class TrackSegment implements Cloneable {
                 idKeyHashMapList.put(key, new WeakReference<>(this));
                 this.id = key;
             }
-            else
-                IcyLogger.warn(this.getClass(), "Track ID already loaded.");
+            else {
+                if (LOGGER.isLoggable(Level.WARNING))
+                    LOGGER.log(Level.WARNING, "Track ID already loaded.");
+            }
         }
     }
 
@@ -209,7 +214,8 @@ public class TrackSegment implements Cloneable {
         if (!detectionList.isEmpty()) {
             final Detection detectionPrevious = getLastDetection();
             if (detection.getT() != detectionPrevious.getT() + 1) {
-                IcyLogger.warn(this.getClass(), "TrackSegment : The detection must be added with consecutive T value. Detection was not added.");
+                if (LOGGER.isLoggable(Level.WARNING))
+                    LOGGER.log(Level.WARNING, "TrackSegment : The detection must be added with consecutive T value. Detection was not added.");
                 // throw new IllegalArgumentException();
                 return;
             }

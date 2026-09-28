@@ -20,13 +20,16 @@ package plugins.fab.trackmanager;
 
 import fr.icy.gui.GuiUtil;
 import fr.icy.gui.dialog.ActionDialog;
-import fr.icy.system.logging.IcyLogger;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class TrackLengthDialog implements ActionListener {
+    private static final Logger LOGGER = Logger.getLogger(TrackLengthDialog.class.getName());
+
     JTextField textField = new JTextField("3-10");
     TrackPool trackPool;
 
@@ -65,7 +68,8 @@ public class TrackLengthDialog implements ActionListener {
             highVal = Integer.MAX_VALUE;
         }
 
-        IcyLogger.debug(this.getClass(), "low val : " + lowVal, "high val : " + highVal);
+        if (LOGGER.isLoggable(Level.WARNING))
+            LOGGER.log(Level.WARNING, "low val : " + lowVal, "high val : " + highVal);
 
         trackPool.selectTracksByLength(lowVal, highVal);
     }

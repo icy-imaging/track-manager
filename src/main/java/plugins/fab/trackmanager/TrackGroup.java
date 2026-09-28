@@ -19,14 +19,17 @@
 package plugins.fab.trackmanager;
 
 import fr.icy.model.sequence.Sequence;
-import fr.icy.system.logging.IcyLogger;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import plugins.nchenouard.spot.Detection;
 
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class TrackGroup {
+    private static final Logger LOGGER = Logger.getLogger(TrackGroup.class.getName());
+
     private final Sequence sequence;
     /**
      * DO NOT DIRECTLY ADD OR REMOVE tracks from this trackSegmentList. Always use getters and adder/setters
@@ -52,7 +55,8 @@ public class TrackGroup {
 
     public void addTrackSegment(final @NotNull TrackSegment ts) {
         if (ts.getOwnerTrackGroup() != null) {
-            IcyLogger.warn(this.getClass(), "The trackSegment is already owned by another TrackGroup.");
+            if (LOGGER.isLoggable(Level.WARNING))
+                LOGGER.log(Level.WARNING, "The trackSegment is already owned by another TrackGroup.");
             return;
         }
 

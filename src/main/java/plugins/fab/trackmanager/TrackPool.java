@@ -23,15 +23,17 @@ import fr.icy.gui.dialog.MessageDialog;
 import fr.icy.gui.frame.progress.AnnounceFrame;
 import fr.icy.model.sequence.Sequence;
 import fr.icy.model.swimmingPool.SwimmingObject;
-import fr.icy.system.logging.IcyLogger;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import plugins.nchenouard.spot.Detection;
 
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * TrackPool object used for TrackEditor. A trackPool is as a pool of TrackSegment.
@@ -39,6 +41,8 @@ import java.util.List;
  * @author Fabrice de Chaumont
  */
 public class TrackPool {
+    private static final Logger LOGGER = Logger.getLogger(TrackPool.class.getName());
+
     private final TrackManagerPainter tePainter;
 
     private final ArrayList<PluginTrackManagerProcessor> trackManagerProcessorList = new ArrayList<>();
@@ -120,18 +124,18 @@ public class TrackPool {
         TrackSegment segmentEnd = getTrackSegmentWithDetection(detectionEnd);
 
         if (segmentStart == segmentEnd) {
-            MessageDialog.showDialog("Can't link 2 detections belonging to the same track.", MessageDialog.INFORMATION_MESSAGE);
+            MessageDialog.showDialog("Can't link 2 detections belonging to the same track.", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
 
         //if (segmentStart.getOwnerTrackGroup() != segmentStart.getOwnerTrackGroup()) { // TODO I think it's an error
         if (segmentStart.getOwnerTrackGroup() != segmentEnd.getOwnerTrackGroup()) {
-            MessageDialog.showDialog("The two tracks should be from the same track group.", MessageDialog.INFORMATION_MESSAGE);
+            MessageDialog.showDialog("The two tracks should be from the same track group.", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
 
         if (detectionStart.getT() >= detectionEnd.getT()) {
-            MessageDialog.showDialog("Can't create a backward link.", MessageDialog.INFORMATION_MESSAGE);
+            MessageDialog.showDialog("Can't create a backward link.", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
 
@@ -342,7 +346,8 @@ public class TrackPool {
 
         final TrackGroup trackGroup = getTrackGroupContainingSegment(ts);
         if (trackGroup == null) {
-            IcyLogger.warn(this.getClass(), "Can't delete The track segment " + ts + " Reason: it is not in any trackGroup.");
+            if (LOGGER.isLoggable(Level.WARNING))
+                LOGGER.log(Level.WARNING, "Can't delete The track segment " + ts + " Reason: it is not in any trackGroup.");
             return;
         }
         trackGroup.getTrackSegmentList().remove(ts);
@@ -589,7 +594,8 @@ public class TrackPool {
 
         for (final TrackSegment ts : inputTrackSegmentList) {
             if (ts.getFirstDetection() == null || ts.getLastDetection() == null) {
-                IcyLogger.warn(TrackPool.class, "Warning, found and removed empty track segment");
+                if (LOGGER.isLoggable(Level.WARNING))
+                    LOGGER.log(Level.WARNING, "Warning, found and removed empty track segment");
                 continue;
             }
 
@@ -603,7 +609,8 @@ public class TrackPool {
             }
 
             if (skipTrackSegment) {
-                IcyLogger.warn(TrackPool.class, "Warning, found and removed empty track segment");
+                if (LOGGER.isLoggable(Level.WARNING))
+                    LOGGER.log(Level.WARNING, "Warning, found and removed empty track segment");
                 continue;
             }
 

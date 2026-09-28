@@ -27,7 +27,6 @@ import fr.icy.gui.viewer.ViewerListener;
 import fr.icy.model.overlay.Overlay;
 import fr.icy.model.sequence.DimensionId;
 import fr.icy.model.sequence.Sequence;
-import fr.icy.system.logging.IcyLogger;
 import fr.icy.system.thread.ThreadUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -44,6 +43,8 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Panel managing Tracks and users interactions.
@@ -51,6 +52,8 @@ import java.util.HashMap;
  * @author Fabrice de Chaumont
  */
 public class TrackPanel extends JPanel implements MouseListener, MouseMotionListener, TrackPainterListener, TrackManagerProcessorListener, ViewerListener, GlobalSequenceListener, GlobalViewerListener, Runnable {
+    private static final Logger LOGGER = Logger.getLogger(TrackPanel.class.getName());
+
     TimeCursor timeCursor = new TimeCursor();
 
     /**
@@ -691,7 +694,8 @@ public class TrackPanel extends JPanel implements MouseListener, MouseMotionList
 
         if (width * height > maxSize) {
             height = maxSize / width;
-            IcyLogger.warn(this.getClass(), "too much track to display them all in trackManager left panel.", "Still, they all appear on the sequence.");
+            if (LOGGER.isLoggable(Level.WARNING))
+                LOGGER.log(Level.WARNING, "too much track to display them all in trackManager left panel.", "Still, they all appear on the sequence.");
         }
 
         // if ( trackingPanelSize.width * trackingPanelSize.height > maxSize )
@@ -718,12 +722,9 @@ public class TrackPanel extends JPanel implements MouseListener, MouseMotionList
                             BufferedImage.TYPE_INT_RGB);
                 }
                 catch (final OutOfMemoryError e) {
-                    IcyLogger.error(
-                            this.getClass(),
-                            e,
-                            "can't create " + trackingPanelSize.width + "x" + trackingPanelSize.height + " bitmap for track representation in trackPanel.",
-                            "left panel disabled"
-                    );
+                    if (LOGGER.isLoggable(Level.SEVERE))
+                        LOGGER.log(Level.SEVERE,
+                                "can't create " + trackingPanelSize.width + "x" + trackingPanelSize.height + " bitmap for track representation in trackPanel. Left panel disabled.", e);
                     enableLeftPanelTrackDisplay = false;
                     return;
                 }

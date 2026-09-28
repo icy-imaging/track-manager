@@ -1,4 +1,4 @@
-![Version 2.0.0 alpha 7](https://img.shields.io/badge/v2.0.0-alpha_7-royalblue)
+![Version 2.0.0 alpha 8](https://img.shields.io/badge/v2.0.0-alpha_8-royalblue)
 ![Java 17+](https://img.shields.io/badge/OpenJDK-17+-5382A1?labelColor=E76F00)
 [![License: LGPL v3](https://img.shields.io/badge/LGPLv3-008033?logo=GPLv3&logoSize=auto)](https://www.gnu.org/licenses/lgpl-3.0)
 [![Twitter](https://img.shields.io/twitter/follow/Icy_BioImaging)](https://x.com/Icy_BioImaging)
@@ -16,8 +16,6 @@ This can affect the display of tracks, selection in time or by ROIs, and also co
 
 <a href="https://link.springer.com/chapter/10.1007%2F978-3-030-44826-4_25">This book chapter</a> proposes a **<a href="https://link.springer.com/chapter/10.1007%2F978-3-030-44826-4_25#SupplementaryMaterial">video tutorial</a>** on the Track Manager plugin associated with the Active Contours plugin (see tutorial 5).
 Images used in the tutorial are available on <a href="https://zenodo.org/record/3594363#.Xti6AsA6-Uk">this Zenodo repository</a>.
-
-More detailed user documentation can be found on the Track Manager documentation page on the Icy website: http://icy.bioimageanalysis.org/plugin/track-manager/
 
 ## Installation instructions
 
@@ -42,9 +40,9 @@ More detailed user documentation can be found on the Track Manager documentation
 Add this dependency block in your `pom.xml`
 ```xml
 <dependency>
-    <groupId>fr.icy.extensions</groupId>
+    <groupId>fr.icy.extension</groupId>
     <artifactId>track-manager</artifactId>
-    <version>${fr.icy.extensions.track-manager.version}</version>
+    <version>${fr.icy.extension.track-manager.version}</version>
 </dependency>
 ```
 

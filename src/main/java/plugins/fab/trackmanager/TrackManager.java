@@ -42,7 +42,6 @@ import fr.icy.model.swimmingPool.SwimmingPoolEvent;
 import fr.icy.model.swimmingPool.SwimmingPoolEventType;
 import fr.icy.model.swimmingPool.SwimmingPoolListener;
 import fr.icy.network.NetworkUtil;
-import fr.icy.system.logging.IcyLogger;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.w3c.dom.Document;
@@ -60,6 +59,8 @@ import java.awt.event.AdjustmentListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 
 /**
@@ -67,6 +68,8 @@ import java.util.prefs.Preferences;
  */
 @IcyPluginName("Track Manager")
 public class TrackManager extends PluginActionable implements AdjustmentListener, ActionListener, SwimmingPoolListener, IcyFrameListener {
+    private static final Logger LOGGER = Logger.getLogger(TrackManager.class.getName());
+
     /**
      * is this track manager not used anymore (TODO:Should change to a listener structure.)
      */
@@ -96,7 +99,8 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
 
     void loadTrackProcessor(final PluginDescriptor pluginDescriptor) {
         if (pluginDescriptor == null || pluginDescriptor.getPluginClass() == null) {
-            IcyLogger.error(this.getClass(), "Can't load processor (plugin not found)");
+            if (LOGGER.isLoggable(Level.SEVERE))
+                LOGGER.log(Level.SEVERE, "Can't load processor (plugin not found)");
             return;
         }
 
@@ -105,11 +109,13 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
             ptep = (PluginTrackManagerProcessor) pluginDescriptor.getPluginClass().getDeclaredConstructor().newInstance();
         }
         catch (final Exception e) {
-            IcyLogger.error(this.getClass(), e, "Can't instantiate plugin class " + pluginDescriptor.getPluginClass());
+            if (LOGGER.isLoggable(Level.SEVERE))
+                LOGGER.log(Level.SEVERE, "Can't instantiate plugin class " + pluginDescriptor.getPluginClass(), e);
         }
 
         if (ptep == null) {
-            IcyLogger.error(this.getClass(), "Can't load processor.");
+            if (LOGGER.isLoggable(Level.SEVERE))
+                LOGGER.log(Level.SEVERE, "Can't load processor.");
             return;
         }
 
@@ -574,7 +580,8 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
 
         public CheckBoxResultSource(final @NotNull SwimmingObject result, final boolean enabled) {
             if (!(result.getObject() instanceof final TrackGroup trackGroup)) {
-                IcyLogger.error(this.getClass(), "Result object type not supported.");
+                if (LOGGER.isLoggable(Level.SEVERE))
+                    LOGGER.log(Level.SEVERE, "Result object type not supported.");
                 return;
             }
 
@@ -727,7 +734,7 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
             trackPool.fireTrackEditorProcessorChange();
         }
         catch (final IllegalArgumentException ex) {
-            MessageDialog.showDialog(ex.getMessage(), MessageDialog.ERROR_MESSAGE);
+            MessageDialog.showDialog(ex.getMessage(), JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -829,7 +836,7 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
             trackPool.fireTrackEditorProcessorChange();
         }
         catch (final IllegalArgumentException ex) {
-            MessageDialog.showDialog(ex.getMessage(), MessageDialog.ERROR_MESSAGE);
+            MessageDialog.showDialog(ex.getMessage(), JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -891,7 +898,8 @@ public class TrackManager extends PluginActionable implements AdjustmentListener
     }
 
     private void debug() {
-        IcyLogger.debug(this.getClass(), "--- debug");
+        if (LOGGER.isLoggable(Level.WARNING))
+            LOGGER.log(Level.WARNING, "--- debug");
         // for ( Link link : trackPool.getLinks() )
         // {
         // System.out.println( link );
